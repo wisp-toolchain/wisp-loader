@@ -1,18 +1,47 @@
 package me.alphamode.wisp.loader.mixin;
 
+import me.alphamode.wisp.loader.LibraryFinder;
+import me.alphamode.wisp.loader.WispClassLoader;
 import me.alphamode.wisp.loader.WispLoader;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.tree.ClassNode;
+import org.spongepowered.asm.launch.platform.container.ContainerHandleURI;
 import org.spongepowered.asm.launch.platform.container.IContainerHandle;
 import org.spongepowered.asm.logging.ILogger;
+import org.spongepowered.asm.logging.LoggerAdapterDefault;
 import org.spongepowered.asm.mixin.MixinEnvironment;
+import org.spongepowered.asm.mixin.transformer.IMixinTransformer;
 import org.spongepowered.asm.mixin.transformer.IMixinTransformerFactory;
 import org.spongepowered.asm.service.*;
 import org.spongepowered.asm.util.ReEntranceLock;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
-public class WispMixinService implements IMixinService, IClassProvider {
+public class WispMixinService implements IMixinService, IClassProvider, IClassBytecodeProvider, ITransformerProvider, IClassTracker {
+    static IMixinTransformer transformer;
+
+    private final WispClassLoader classLoader;
+    /**
+     * Transformer re-entrance lock, shared between the mixin transformer and
+     * the metadata service
+     */
+    protected final ReEntranceLock lock = new ReEntranceLock(1);
+
+    /**
+     * Cached logger adapters
+     */
+    private static final Map<String, ILogger> loggers = new HashMap<>();
+
+    public WispMixinService() {
+        this.classLoader = WispLoader.get().getClassLoader();
+    }
+
     @Override
     public String getName() {
         return "WispLoader";
@@ -20,7 +49,7 @@ public class WispMixinService implements IMixinService, IClassProvider {
 
     @Override
     public boolean isValid() {
-        return false;
+        return true;
     }
 
     @Override
@@ -30,14 +59,14 @@ public class WispMixinService implements IMixinService, IClassProvider {
 
     @Override
     public MixinEnvironment.Phase getInitialPhase() {
-        return null;
+        return MixinEnvironment.Phase.PREINIT;
     }
 
     @Override
     public void offer(IMixinInternal internal) {
-//        if (internal instanceof IMixinTransformerFactory) {
-//            transformer = ((IMixinTransformerFactory) internal).createTransformer();
-//        }
+        if (internal instanceof IMixinTransformerFactory) {
+            transformer = ((IMixinTransformerFactory) internal).createTransformer();
+        }
     }
 
     @Override
@@ -57,7 +86,7 @@ public class WispMixinService implements IMixinService, IClassProvider {
 
     @Override
     public ReEntranceLock getReEntranceLock() {
-        return null;
+        return this.lock;
     }
 
     @Override
@@ -67,17 +96,17 @@ public class WispMixinService implements IMixinService, IClassProvider {
 
     @Override
     public IClassBytecodeProvider getBytecodeProvider() {
-        return null;
+        return this;
     }
 
     @Override
     public ITransformerProvider getTransformerProvider() {
-        return null;
+        return this;
     }
 
     @Override
     public IClassTracker getClassTracker() {
-        return null;
+        return this;
     }
 
     @Override
@@ -87,27 +116,27 @@ public class WispMixinService implements IMixinService, IClassProvider {
 
     @Override
     public Collection<String> getPlatformAgents() {
-        return null;
+        return Collections.singletonList("org.spongepowered.asm.launch.platform.MixinPlatformAgentDefault");
     }
 
     @Override
     public IContainerHandle getPrimaryContainer() {
-        return null;
+        return new ContainerHandleURI(LibraryFinder.getCodeSource(LibraryFinder.class).toUri());
     }
 
     @Override
     public Collection<IContainerHandle> getMixinContainers() {
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
     public InputStream getResourceAsStream(String name) {
-        return null;
+        return classLoader.getResourceAsStream(name);
     }
 
     @Override
     public String getSideName() {
-        return null;
+        return "client";
     }
 
     @Override
@@ -121,8 +150,16 @@ public class WispMixinService implements IMixinService, IClassProvider {
     }
 
     @Override
-    public ILogger getLogger(String name) {
-        return null;
+    public synchronized ILogger getLogger(final String name) {
+        ILogger logger = loggers.get(name);
+        if (logger == null) {
+            loggers.put(name, logger = this.createLogger(name));
+        }
+        return logger;
+    }
+
+    protected ILogger createLogger(final String name) {
+        return new WispMixinLogger(name);
     }
 
     @Override
@@ -132,16 +169,63 @@ public class WispMixinService implements IMixinService, IClassProvider {
 
     @Override
     public Class<?> findClass(String name) throws ClassNotFoundException {
-        return WispLoader.get();
+        return classLoader.loadClass(name);
     }
 
     @Override
     public Class<?> findClass(String name, boolean initialize) throws ClassNotFoundException {
-        return null;
+        return Class.forName(name, initialize, classLoader);
     }
 
     @Override
     public Class<?> findAgentClass(String name, boolean initialize) throws ClassNotFoundException {
-        return null;
+        return Class.forName(name, initialize, WispLoader.class.getClassLoader());
+    }
+
+    static IMixinTransformer getTransformer() {
+        return transformer;
+    }
+
+    @Override
+    public ClassNode getClassNode(String name) throws ClassNotFoundException, IOException {
+        return getClassNode(name, true);
+    }
+
+    @Override
+    public ClassNode getClassNode(String name, boolean runTransformers) throws ClassNotFoundException, IOException {
+        ClassReader reader = new ClassReader(classLoader.getProcessedClassByteArray(name, runTransformers));
+        ClassNode node = new ClassNode();
+        reader.accept(node, 0);
+        return node;
+    }
+
+    @Override
+    public Collection<ITransformer> getTransformers() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Collection<ITransformer> getDelegatedTransformers() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public void addTransformerExclusion(String name) {
+
+    }
+
+    @Override
+    public void registerInvalidClass(String className) {
+
+    }
+
+    @Override
+    public boolean isClassLoaded(String className) {
+        return classLoader.isClassLoaded(className);
+    }
+
+    @Override
+    public String getClassRestrictions(String className) {
+        return "";
     }
 }

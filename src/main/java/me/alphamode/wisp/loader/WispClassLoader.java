@@ -1,5 +1,7 @@
 package me.alphamode.wisp.loader;
 
+import me.alphamode.wisp.loader.api.ClassTransformer;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,7 +9,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.security.SecureClassLoader;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Objects;
 import java.util.jar.Manifest;
 
@@ -37,13 +41,19 @@ public class WispClassLoader extends SecureClassLoader {
         }
     }
 
-    public WispClassLoader(URL[] urls) {
+    public WispClassLoader() {
         super(new FallbackClassLoader());
         this.parent = getClass().getClassLoader();
         this.urlLoader = new WispURLClassLoader();
+    }
 
+    public void addUrls(URL[] urls) {
         for (URL url : urls)
             this.urlLoader.addURL(url);
+    }
+
+    public void addUrl(URL url) {
+        this.urlLoader.addURL(url);
     }
 
     @Override
@@ -224,9 +234,15 @@ public class WispClassLoader extends SecureClassLoader {
         }
     }
 
-    private byte[] getProcessedClassByteArray(String name, boolean allowFromParent) {
+    private final List<ClassTransformer> transformers = new ArrayList<>();
+
+    public byte[] getProcessedClassByteArray(String name, boolean allowFromParent) {
         try {
-            return getRawClassByteArray(name, allowFromParent);
+            byte[] classBytes = getRawClassByteArray(name, allowFromParent);
+            for (ClassTransformer transformer : transformers) {
+                classBytes = transformer.transform(name, classBytes);
+            }
+            return classBytes;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -259,6 +275,34 @@ public class WispClassLoader extends SecureClassLoader {
             }
 
             return outputStream.toByteArray();
+        }
+    }
+
+    public void registerClassTransformer(ClassTransformer transformer) {
+        this.transformers.add(transformer);
+    }
+
+    public boolean isClassLoaded(String name) {
+        synchronized (getClassLoadingLock(name)) {
+            return findLoadedClass(name) != null;
+        }
+    }
+
+    public Class<?> loadIntoTarget(String name) throws ClassNotFoundException {
+        synchronized (getClassLoadingLock(name)) {
+            Class<?> c = findLoadedClass(name);
+
+            if (c == null) {
+                c = loadClass(name, true);
+
+                if (c == null) {
+                    throw new ClassNotFoundException("can't find class "+name);
+                }
+            }
+
+            resolveClass(c);
+
+            return c;
         }
     }
 }

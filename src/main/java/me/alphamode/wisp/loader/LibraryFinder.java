@@ -7,6 +7,7 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.CodeSource;
 
 public class LibraryFinder {
     private static Path libsPath;
@@ -75,6 +76,13 @@ public class LibraryFinder {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static Path getCodeSource(Class<?> cls) {
+        CodeSource cs = cls.getProtectionDomain().getCodeSource();
+        if (cs == null) return null;
+
+        return asPath(cs.getLocation());
     }
 
     public static Path asPath(URL url) {

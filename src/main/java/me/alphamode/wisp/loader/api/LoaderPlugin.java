@@ -1,5 +1,6 @@
 package me.alphamode.wisp.loader.api;
 
+import me.alphamode.wisp.loader.WispClassLoader;
 import me.alphamode.wisp.loader.WispLoader;
 import me.alphamode.wisp.loader.WispLoaderPlugin;
 
@@ -37,7 +38,5 @@ public interface LoaderPlugin {
             WispLoader.get().locator = locator;
     }
 
-    default void registerClassTransformer(ClassTransformer transformer) {
-
-    }
+    default void registerClassTransformer(WispClassLoader classLoader) {}
 }

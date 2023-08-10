@@ -21,10 +21,9 @@ repositories {
     }
 }
 
-wisp.minecraft("1.20.1")
+wisp.minecraft("23w32a")
 
 dependencies {
-    minecraft("com.mojang:minecraft:1.20.1")
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
