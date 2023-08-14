@@ -1,4 +1,4 @@
-package me.alphamode.wisp.loader.mixin;
+package me.alphamode.wisp.loader.impl.mixin;
 
 import me.alphamode.wisp.loader.api.ClassTransformer;
 

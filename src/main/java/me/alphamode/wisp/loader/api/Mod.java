@@ -12,8 +12,4 @@ public interface Mod {
     String getId();
 
     String getVersion();
-
-    default LoaderPlugin getLoaderPlugin() {
-        return null;
-    };
 }

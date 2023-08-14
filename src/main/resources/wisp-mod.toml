@@ -1,2 +1,7 @@
-mod-id="wisp-loader"
+mod-id="wisp-test"
 version="1.0.0"
+[entrypoints]
+[entrypoints.client]
+classes=[
+    "me.alphamode.test.WispTest"
+]

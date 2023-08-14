@@ -1,6 +1,8 @@
 package me.alphamode.wisp.loader;
 
 import me.alphamode.wisp.loader.api.ClassTransformer;
+import me.alphamode.wisp.loader.api.GameLocator;
+import me.alphamode.wisp.loader.api.Mod;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -9,10 +11,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.security.SecureClassLoader;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.jar.Manifest;
 
 public class WispClassLoader extends SecureClassLoader {

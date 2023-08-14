@@ -1,14 +1,14 @@
-package me.alphamode.wisp.loader.mixin;
+package me.alphamode.wisp.loader.impl.mixin;
 
 import me.alphamode.wisp.loader.LibraryFinder;
 import me.alphamode.wisp.loader.WispClassLoader;
 import me.alphamode.wisp.loader.WispLoader;
+import me.alphamode.wisp.loader.api.PluginContext;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.launch.platform.container.ContainerHandleURI;
 import org.spongepowered.asm.launch.platform.container.IContainerHandle;
 import org.spongepowered.asm.logging.ILogger;
-import org.spongepowered.asm.logging.LoggerAdapterDefault;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.transformer.IMixinTransformer;
 import org.spongepowered.asm.mixin.transformer.IMixinTransformerFactory;
@@ -26,7 +26,6 @@ import java.util.Map;
 public class WispMixinService implements IMixinService, IClassProvider, IClassBytecodeProvider, ITransformerProvider, IClassTracker {
     static IMixinTransformer transformer;
 
-    private final WispClassLoader classLoader;
     /**
      * Transformer re-entrance lock, shared between the mixin transformer and
      * the metadata service
@@ -37,10 +36,6 @@ public class WispMixinService implements IMixinService, IClassProvider, IClassBy
      * Cached logger adapters
      */
     private static final Map<String, ILogger> loggers = new HashMap<>();
-
-    public WispMixinService() {
-        this.classLoader = WispLoader.get().getClassLoader();
-    }
 
     @Override
     public String getName() {
@@ -131,7 +126,7 @@ public class WispMixinService implements IMixinService, IClassProvider, IClassBy
 
     @Override
     public InputStream getResourceAsStream(String name) {
-        return classLoader.getResourceAsStream(name);
+        return getClass().getClassLoader().getResourceAsStream(name);
     }
 
     @Override
@@ -169,12 +164,12 @@ public class WispMixinService implements IMixinService, IClassProvider, IClassBy
 
     @Override
     public Class<?> findClass(String name) throws ClassNotFoundException {
-        return classLoader.loadClass(name);
+        return PluginContext.CLASS_LOADER.loadClass(name);
     }
 
     @Override
     public Class<?> findClass(String name, boolean initialize) throws ClassNotFoundException {
-        return Class.forName(name, initialize, classLoader);
+        return Class.forName(name, initialize, PluginContext.CLASS_LOADER);
     }
 
     @Override
@@ -193,7 +188,7 @@ public class WispMixinService implements IMixinService, IClassProvider, IClassBy
 
     @Override
     public ClassNode getClassNode(String name, boolean runTransformers) throws ClassNotFoundException, IOException {
-        ClassReader reader = new ClassReader(classLoader.getProcessedClassByteArray(name, runTransformers));
+        ClassReader reader = new ClassReader(PluginContext.CLASS_LOADER.getProcessedClassByteArray(name, runTransformers));
         ClassNode node = new ClassNode();
         reader.accept(node, 0);
         return node;
@@ -221,7 +216,7 @@ public class WispMixinService implements IMixinService, IClassProvider, IClassBy
 
     @Override
     public boolean isClassLoaded(String className) {
-        return classLoader.isClassLoaded(className);
+        return PluginContext.CLASS_LOADER.isClassLoaded(className);
     }
 
     @Override

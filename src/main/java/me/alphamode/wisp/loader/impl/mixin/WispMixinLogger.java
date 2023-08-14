@@ -1,4 +1,4 @@
-package me.alphamode.wisp.loader.mixin;
+package me.alphamode.wisp.loader.impl.mixin;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,6 +1,5 @@
-package me.alphamode.wisp.loader.mixin;
+package me.alphamode.wisp.loader.impl.mixin;
 
-import me.alphamode.wisp.loader.api.LoaderPlugin;
 import me.alphamode.wisp.loader.api.Mod;
 
 import java.nio.file.Path;
@@ -19,10 +18,5 @@ public class MixinMod implements Mod {
     @Override
     public String getVersion() {
         return "loser";
-    }
-
-    @Override
-    public LoaderPlugin getLoaderPlugin() {
-        return new MixinLoaderPlugin();
     }
 }

@@ -1,12 +1,10 @@
-package me.alphamode.wisp.loader.api;
+package me.alphamode.wisp.loader.impl;
 
-import me.alphamode.wisp.loader.WispLoaderPlugin;
+import me.alphamode.wisp.loader.api.Mod;
 
 import java.nio.file.Path;
 
 public class LoaderMod implements Mod {
-    private final WispLoaderPlugin plugin = new WispLoaderPlugin();
-
     @Override
     public Path getPath() {
         return null;
@@ -20,10 +18,5 @@ public class LoaderMod implements Mod {
     @Override
     public String getVersion() {
         return "1.0";
-    }
-
-    @Override
-    public LoaderPlugin getLoaderPlugin() {
-        return this.plugin;
     }
 }

@@ -1,4 +1,4 @@
-package me.alphamode.wisp.loader.mixin;
+package me.alphamode.wisp.loader.impl.mixin;
 
 import org.spongepowered.asm.service.IGlobalPropertyService;
 import org.spongepowered.asm.service.IPropertyKey;
