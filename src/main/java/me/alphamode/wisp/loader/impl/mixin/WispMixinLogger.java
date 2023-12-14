@@ -34,12 +34,10 @@ public class WispMixinLogger implements ILogger {
 
     @Override
     public void debug(String message, Object... params) {
-        this.logger.debug(message, params);
     }
 
     @Override
     public void debug(String message, Throwable t) {
-        this.logger.debug(message, t);
     }
 
     @Override
@@ -64,12 +62,10 @@ public class WispMixinLogger implements ILogger {
 
     @Override
     public void info(String message, Object... params) {
-        this.logger.info(message, params);
     }
 
     @Override
     public void info(String message, Throwable t) {
-        this.logger.info(message, t);
     }
 
     @Override

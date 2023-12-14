@@ -1,10 +1,10 @@
 package me.alphamode.wisp.loader;
 
 import me.alphamode.wisp.loader.api.Mod;
-import org.tomlj.Toml;
 import org.tomlj.TomlParseResult;
 
 import java.nio.file.Path;
+import java.util.List;
 
 public class JarMod implements Mod {
     private final Path jarPath;
@@ -19,8 +19,8 @@ public class JarMod implements Mod {
     }
 
     @Override
-    public Path getPath() {
-        return this.jarPath;
+    public List<Path> getPaths() {
+        return List.of(this.jarPath);
     }
 
     @Override

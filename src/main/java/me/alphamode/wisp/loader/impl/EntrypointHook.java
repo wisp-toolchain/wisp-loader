@@ -1,7 +1,7 @@
 package me.alphamode.wisp.loader.impl;
 
 import me.alphamode.wisp.loader.JarMod;
-import me.alphamode.wisp.loader.WispLoader;
+import me.alphamode.wisp.loader.api.WispLoader;
 import org.tomlj.TomlArray;
 import org.tomlj.TomlParseResult;
 

@@ -1,11 +1,10 @@
-package me.alphamode.wisp.loader;
+package me.alphamode.wisp.loader.api;
 
 import com.mojang.logging.LogUtils;
-import me.alphamode.wisp.loader.api.Mod;
 import me.alphamode.wisp.loader.impl.WispLoaderImpl;
-import me.alphamode.wisp.loader.impl.WispUtils;
 import org.slf4j.Logger;
 
+import java.nio.file.Path;
 import java.util.Map;
 
 public interface WispLoader {
@@ -13,9 +12,15 @@ public interface WispLoader {
 
     boolean isDevelopment();
 
+    boolean isServer();
+
     static WispLoader get() {
         return WispLoaderImpl.INSTANCE;
     }
 
+    Path getGameDir();
+
     Map<String, Mod> getMods();
+
+    String getVersion();
 }

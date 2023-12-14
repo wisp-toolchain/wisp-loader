@@ -3,11 +3,12 @@ package me.alphamode.wisp.loader.impl;
 import me.alphamode.wisp.loader.api.Mod;
 
 import java.nio.file.Path;
+import java.util.List;
 
 public class LoaderMod implements Mod {
     @Override
-    public Path getPath() {
-        return null;
+    public List<Path> getPaths() {
+        return List.of();
     }
 
     @Override

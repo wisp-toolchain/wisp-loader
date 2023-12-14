@@ -1,59 +1,68 @@
 package me.alphamode.wisp.loader.impl;
 
-import com.google.common.collect.ImmutableMap;
 import me.alphamode.wisp.loader.JarMod;
 import me.alphamode.wisp.loader.Main;
-import me.alphamode.wisp.loader.WispLoader;
-import me.alphamode.wisp.loader.WispLoaderPlugin;
 import me.alphamode.wisp.loader.api.*;
+import me.alphamode.wisp.loader.impl.minecraft.WispLoaderPlugin;
 import me.alphamode.wisp.loader.impl.mixin.MixinLoaderPlugin;
 import org.tomlj.Toml;
 import org.tomlj.TomlParseResult;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.JarURLConnection;
-import java.net.MalformedURLException;
+import java.net.URLConnection;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.stream.Stream;
 
 public class WispLoaderImpl implements WispLoader {
     public static final WispLoaderImpl INSTANCE = new WispLoaderImpl();//InitHelper.get();
-    private final Map<String, LoaderPlugin> plugins = new HashMap<>();
-    private final Map<String, Mod> buildingModList = new HashMap<>();
+    private final SortedMap<String, LoaderPlugin> plugins = new TreeMap<>();
+    private final SortedMap<String, Mod> buildingModList = new TreeMap<>();
     private Map<String, Mod> mods;
     private GameLocator locator;
 
-    public void load(List<Path> libs) {
+    public List<Path> load(ArgumentList argumentList) {
         plugins.put("wisp-loader", new WispLoaderPlugin());
         plugins.put("mixin", new MixinLoaderPlugin());
         locateMods();
 
         plugins.forEach((modId, mod) -> {
-            if (!buildingModList.containsKey(modId))
+            if (plugins.containsKey(modId))
                 return;
-            Path modLocation = buildingModList.get(modId).getPath();
-            if (modLocation != null) {
-                try {
-                    PluginContext.CLASS_LOADER.addUrl(modLocation.toUri().toURL());
-                } catch (MalformedURLException e) {
-                    throw new RuntimeException(e);
-                }
+            try {
+                PluginContext.CLASS_LOADER.addMod(buildingModList.get(modId));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         });
 
-        PluginContext context = new PluginContext();
+        PluginContext context = new PluginContext(argumentList);
 
         WispLoader.LOGGER.info("Loading loader plugins");
         plugins.forEach((modId, mod) -> {
             WispLoader.LOGGER.info("   " + modId);
         });
+
+        plugins.forEach((modId, plugin) -> {
+            if (plugin instanceof InternalPlugin)
+                plugin.preInit(context);
+        });
+
+        plugins.forEach((modId, plugin) -> {
+            if (plugin instanceof InternalPlugin)
+                return;
+            plugin.preInit(context);
+        });
+
+        List<Path> libs = context.getLocator().getGameClassPaths(argumentList.toArray());
+        context.setClassPath(libs);
 
         plugins.forEach((modId, plugin) -> {
             plugin.init(context);
@@ -66,11 +75,10 @@ public class WispLoaderImpl implements WispLoader {
         for (ClassTransformer transformer : context.getTransformers())
             PluginContext.CLASS_LOADER.registerClassTransformer(transformer);
 
-        this.mods = ImmutableMap.copyOf(buildingModList);
+        this.mods = Map.copyOf(buildingModList);
 
-        plugins.forEach((s, loaderPlugin) -> {
-            loaderPlugin.onFinish(mods);
-        });
+
+        return context.getClassPath();
     }
 
     public GameLocator getLocator() {
@@ -107,7 +115,7 @@ public class WispLoaderImpl implements WispLoader {
         try {
             Main.class.getClassLoader().getResources("wisp.mod.toml").asIterator().forEachRemaining(url -> {
                 try {
-                    JarURLConnection jarURLConnection = (JarURLConnection) url.openConnection();
+                    URLConnection jarURLConnection = url.openConnection();
                     TomlParseResult result = Toml.parse(jarURLConnection.getInputStream());
                     result.errors().forEach(error -> System.err.println(error.toString()));
                     String modId = result.getString("mod-id");
@@ -119,7 +127,7 @@ public class WispLoaderImpl implements WispLoader {
                             throw new RuntimeException(e);
                         }
                     }
-                    buildingModList.put(modId, new JarMod(Path.of(jarURLConnection.getJarFileURL().getPath()), result));
+                    buildingModList.put(modId, new JarMod(Path.of(url.getPath()), result));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -135,8 +143,27 @@ public class WispLoaderImpl implements WispLoader {
     }
 
     @Override
+    public Path getGameDir() {
+        return Path.of("run");
+    }
+
+    @Override
+    public boolean isServer() {
+        return false;
+    }
+
+    @Override
     public Map<String, Mod> getMods() {
         return this.mods;
+    }
+
+    @Override
+    public String getVersion() {
+        return "wisp-loader";
+    }
+
+    public SortedMap<String, LoaderPlugin> getPlugins() {
+        return plugins;
     }
 
     public static class InitHelper {

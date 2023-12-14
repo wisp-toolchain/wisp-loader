@@ -1,8 +1,7 @@
 package me.alphamode.wisp.loader.impl.mixin;
 
 import me.alphamode.wisp.loader.LibraryFinder;
-import me.alphamode.wisp.loader.WispClassLoader;
-import me.alphamode.wisp.loader.WispLoader;
+import me.alphamode.wisp.loader.api.WispLoader;
 import me.alphamode.wisp.loader.api.PluginContext;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
@@ -13,6 +12,7 @@ import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.transformer.IMixinTransformer;
 import org.spongepowered.asm.mixin.transformer.IMixinTransformerFactory;
 import org.spongepowered.asm.service.*;
+import org.spongepowered.asm.util.Constants;
 import org.spongepowered.asm.util.ReEntranceLock;
 
 import java.io.IOException;
@@ -126,12 +126,12 @@ public class WispMixinService implements IMixinService, IClassProvider, IClassBy
 
     @Override
     public InputStream getResourceAsStream(String name) {
-        return getClass().getClassLoader().getResourceAsStream(name);
+        return PluginContext.CLASS_LOADER.getResourceAsStream(name);
     }
 
     @Override
     public String getSideName() {
-        return "client";
+        return WispLoader.get().isServer() ? Constants.SIDE_SERVER : Constants.SIDE_CLIENT;
     }
 
     @Override
@@ -187,8 +187,8 @@ public class WispMixinService implements IMixinService, IClassProvider, IClassBy
     }
 
     @Override
-    public ClassNode getClassNode(String name, boolean runTransformers) throws ClassNotFoundException, IOException {
-        ClassReader reader = new ClassReader(PluginContext.CLASS_LOADER.getProcessedClassByteArray(name, runTransformers));
+    public ClassNode getClassNode(String name, boolean runTransformers) throws IOException {
+        ClassReader reader = new ClassReader(PluginContext.CLASS_LOADER.getRawClassByteArray(name, runTransformers));
         ClassNode node = new ClassNode();
         reader.accept(node, 0);
         return node;

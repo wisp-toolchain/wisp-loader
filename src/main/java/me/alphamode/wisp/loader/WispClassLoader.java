@@ -1,7 +1,6 @@
 package me.alphamode.wisp.loader;
 
 import me.alphamode.wisp.loader.api.ClassTransformer;
-import me.alphamode.wisp.loader.api.GameLocator;
 import me.alphamode.wisp.loader.api.Mod;
 
 import java.io.ByteArrayOutputStream;
@@ -12,12 +11,15 @@ import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.security.SecureClassLoader;
 import java.util.*;
-import java.util.jar.Manifest;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class WispClassLoader extends SecureClassLoader {
 
     private final ClassLoader parent;
     private final WispURLClassLoader urlLoader;
+    public final Set<Path> validParentCodeSources = new HashSet<>();
+    private volatile Set<Path> codeSources = Collections.emptySet();
+    public final Set<String> parentSourcedClasses = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     public static class WispURLClassLoader extends URLClassLoader {
 
@@ -53,6 +55,24 @@ public class WispClassLoader extends SecureClassLoader {
 
     public void addUrl(URL url) {
         this.urlLoader.addURL(url);
+    }
+
+    public void addMod(Mod mod) throws IOException {
+        for (Path root : mod.getPaths())
+            addUrl(root.toUri().toURL());
+        for (Path path : mod.getPaths()) {
+
+            synchronized (this) {
+                Set<Path> codeSources = this.codeSources;
+                if (codeSources.contains(path)) return;
+
+                Set<Path> newCodeSources = new HashSet<>(codeSources.size() + 1, 1);
+                newCodeSources.addAll(codeSources);
+                newCodeSources.add(path);
+
+                this.codeSources = newCodeSources;
+            }
+        }
     }
 
     @Override
@@ -105,72 +125,47 @@ public class WispClassLoader extends SecureClassLoader {
     }
 
     @Override
-    protected Class<?> findClass(String name) throws ClassNotFoundException {
-        boolean allowFromParent = false;
+    protected Class<?> findClass(String name) {
+        return findClass(name, false);
+    }
+
+    protected Class<?> findClass(String name, boolean allowFromParent) {
         if (name.startsWith("java.")) {
             return null;
         }
 
-//        if (!allowedPrefixes.isEmpty()) { // check prefix restrictions (allows exposing libraries partially during startup)
-//            String fileName = getClassFileName(name);
-//            URL url = getResource(fileName);
-//
-//            if (url != null && hasRegularCodeSource(url)) {
-//                Path codeSource = LibraryFinder.getCodeSource(url, fileName);
-//                String[] prefixes = allowedPrefixes.get(codeSource);
-//
-//                if (prefixes != null) {
-//                    assert prefixes.length > 0;
-//                    boolean found = false;
-//
-//                    for (String prefix : prefixes) {
-//                        if (name.startsWith(prefix)) {
-//                            found = true;
-//                            break;
-//                        }
-//                    }
-//
-//                    if (!found) {
-//                        String msg = "class "+name+" is currently restricted from being loaded";
-//                        if (LOG_CLASS_LOAD_ERRORS) Log.warn(LogCategory.KNOT, msg);
-//                        throw new ClassNotFoundException(msg);
-//                    }
-//                }
-//            }
-//        }
-//
-//        if (!allowFromParent && !parentSourcedClasses.isEmpty()) { // propagate loadIntoTarget behavior to its nested classes
-//            int pos = name.length();
-//
-//            while ((pos = name.lastIndexOf('$', pos - 1)) > 0) {
-//                if (parentSourcedClasses.contains(name.substring(0, pos))) {
-//                    allowFromParent = true;
-//                    break;
-//                }
-//            }
-//        }
+        if (!allowFromParent && !parentSourcedClasses.isEmpty()) { // propagate loadIntoTarget behavior to its nested classes
+            int pos = name.length();
+
+            while ((pos = name.lastIndexOf('$', pos - 1)) > 0) {
+                if (parentSourcedClasses.contains(name.substring(0, pos))) {
+                    allowFromParent = true;
+                    break;
+                }
+            }
+        }
 
         byte[] input = getProcessedClassByteArray(name, allowFromParent);
         if (input == null) return null;
 
         // The class we're currently loading could have been loaded already during Mixin initialization triggered by `getPostMixinClassByteArray`.
         // If this is the case, we want to return the instance that was already defined to avoid attempting a duplicate definition.
-//        Class<?> existingClass = classLoader.findLoadedClassFwd(name);
+        Class<?> existingClass = findLoadedClass(name);
+
+        if (existingClass != null) {
+            return existingClass;
+        }
+
+        if (allowFromParent) {
+            parentSourcedClasses.add(name);
+        }
+
+//        int pkgDelimiterPos = name.lastIndexOf('.');
 //
-//        if (existingClass != null) {
-//            return existingClass;
-//        }
-
-//        if (allowFromParent) {
-//            parentSourcedClasses.add(name);
-//        }
-
-        int pkgDelimiterPos = name.lastIndexOf('.');
-
-        if (pkgDelimiterPos > 0) {
-            // TODO: package definition stub
-            String pkgString = name.substring(0, pkgDelimiterPos);
-
+//        if (pkgDelimiterPos > 0) {
+//            // TODO: package definition stub
+//            String pkgString = name.substring(0, pkgDelimiterPos);
+//
 //            if (getPackage(pkgString) == null) {
 //                try {
 //                    urlLoader.definePackage(pkgString, null, null, null, null, null, null, null);
@@ -178,7 +173,7 @@ public class WispClassLoader extends SecureClassLoader {
 //                    if (getPackage(pkgString) == null) throw e; // still not defined?
 //                }
 //            }
-        }
+//        }
 
         return defineClass(name, input, 0, input.length);
     }
@@ -190,9 +185,9 @@ public class WispClassLoader extends SecureClassLoader {
 
             if (c == null) {
                 if (name.startsWith("java.")) { // fast path for java.** (can only be loaded by the platform CL anyway)
-                    c = getClass().getClassLoader().loadClass(name);
+                    c = PLATFORM_CLASS_LOADER.loadClass(name);
                 } else {
-                    c = findClass(name); // try local load
+                    c = findClass(name, false); // try local load
 
                     if (c == null) { // not available locally, try system class loader
                         String fileName = getClassFileName(name);
@@ -200,28 +195,22 @@ public class WispClassLoader extends SecureClassLoader {
 
                         if (url == null) { // no .class file
                             try {
-                                c = getClass().getClassLoader().loadClass(name);
-//                                if (LOG_CLASS_LOAD) Log.info(LogCategory.KNOT, "loaded resources-less class %s from platform class loader");
+                                c = PLATFORM_CLASS_LOADER.loadClass(name);
                             } catch (ClassNotFoundException e) {
-//                                if (LOG_CLASS_LOAD_ERRORS) Log.warn(LogCategory.KNOT, "can't find class %s", name);
                                 throw e;
                             }
-                        } else/* if (!isValidParentUrl(url, fileName)) { // available, but restricted
+                        } /*else if (!isValidParentUrl(url, fileName)) { // available, but restricted
                             // The class would technically be available, but the game provider restricted it from being
                             // loaded by setting validParentUrls and not including "url". Typical causes are:
                             // - accessing classes too early (game libs shouldn't be used until Loader is ready)
                             // - using jars that are only transient (deobfuscation input or pass-through installers)
-                            String msg = String.format("can't load class %s at %s as it hasn't been exposed to the game (yet? The system property "+SystemProperties.PATH_GROUPS+" may not be set correctly in-dev)",
-                                    name, getCodeSource(url, fileName));
-                            if (LOG_CLASS_LOAD_ERRORS) Log.warn(LogCategory.KNOT, msg);
+                            String msg = String.format("can't load class %s at %s as it hasn't been exposed to the game",
+                                    name, LibraryFinder.getCodeSource(url, fileName));
                             throw new ClassNotFoundException(msg);
-                        } else*/ { // load from system cl
-//                            if (LOG_CLASS_LOAD) Log.info(LogCategory.KNOT, "loading class %s using the parent class loader", name);
+                        } */else { // load from system cl
                             c = parent.loadClass(name);
                         }
-                    }/* else if (LOG_CLASS_LOAD) {
-                        Log.info(LogCategory.KNOT, "loaded class %s", name);
-                    }*/
+                    }
                 }
             }
 
@@ -247,7 +236,7 @@ public class WispClassLoader extends SecureClassLoader {
         }
     }
 
-    private byte[] getRawClassByteArray(String name, boolean allowFromParent) throws IOException {
+    public byte[] getRawClassByteArray(String name, boolean allowFromParent) throws IOException {
         name = getClassFileName(name);
         URL url = findResource(name);
 
@@ -256,11 +245,9 @@ public class WispClassLoader extends SecureClassLoader {
 
             url = parent.getResource(name);
 
-//            if (!isValidParentUrl(url, name)) {
-//                if (LOG_CLASS_LOAD) Log.info(LogCategory.KNOT, "refusing to load class %s at %s from parent class loader", name, LibraryFinder.getCodeSource(url, name));
-//
-//                return null;
-//            }
+            if (!isValidParentUrl(url, name)) {
+                return null;
+            }
         }
 
         try (InputStream inputStream = url.openStream()) {
@@ -302,6 +289,31 @@ public class WispClassLoader extends SecureClassLoader {
             resolveClass(c);
 
             return c;
+        }
+    }
+
+    private static final ClassLoader PLATFORM_CLASS_LOADER = getPlatformClassLoader();
+
+    private static boolean hasRegularCodeSource(URL url) {
+        return url.getProtocol().equals("file") || url.getProtocol().equals("jar");
+    }
+
+    /**
+     * Check if an url is loadable by the parent class loader.
+     *
+     * <p>This handles explicit parent url whitelisting by {@link #validParentCodeSources} or shadowing by {@link #codeSources}
+     */
+    private boolean isValidParentUrl(URL url, String fileName) {
+        if (url == null) return false;
+        if (!hasRegularCodeSource(url)) return true;
+
+        Path codeSource = LibraryFinder.getCodeSource(url, fileName);
+        Set<Path> validParentCodeSources = this.validParentCodeSources;
+
+        if (validParentCodeSources != null) { // explicit whitelist (in addition to platform cl classes)
+            return validParentCodeSources.contains(codeSource) || PLATFORM_CLASS_LOADER.getResource(fileName) != null;
+        } else { // reject urls shadowed by this cl
+            return !codeSources.contains(codeSource);
         }
     }
 }

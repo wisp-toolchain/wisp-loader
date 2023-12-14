@@ -19,6 +19,13 @@ repositories {
     maven {
         url = 'https://plugins.gradle.org/m2/'
     }
+
+    maven {
+        url 'https://repo.sleeping.town'
+        content{
+            includeGroup 'com.unascribed'
+        }
+    }
 }
 
 wisp.minecraft("23w32a")
@@ -27,7 +34,13 @@ dependencies {
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
-    implementation("me.alphamode:wisptestmod:1.0-SNAPSHOT")
+//    implementation("me.alphamode:wisptestmod:1.0-SNAPSHOT")
+    implementation("me.alphamode.wisp.env:WispEnv:1.0")
+
+    implementation 'org.ow2.sat4j:org.ow2.sat4j.core:2.3.6'
+    implementation 'org.ow2.sat4j:org.ow2.sat4j.pb:2.3.6'
+
+    implementation 'com.unascribed:flexver-java:1.0.2'
 
     implementation("com.mojang:logging:1.1.1")
 
@@ -45,6 +58,10 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+java {
+    withSourcesJar()
 }
 
 publishing {
