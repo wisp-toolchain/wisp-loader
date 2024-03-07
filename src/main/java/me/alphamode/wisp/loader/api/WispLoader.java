@@ -1,7 +1,9 @@
 package me.alphamode.wisp.loader.api;
 
 import com.mojang.logging.LogUtils;
+import me.alphamode.wisp.env.Environment;
 import me.alphamode.wisp.loader.impl.WispLoaderImpl;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
@@ -14,6 +16,8 @@ public interface WispLoader {
 
     boolean isServer();
 
+    Environment getEnvironment();
+
     static WispLoader get() {
         return WispLoaderImpl.INSTANCE;
     }
@@ -21,6 +25,9 @@ public interface WispLoader {
     Path getGameDir();
 
     Map<String, Mod> getMods();
+
+    @Nullable
+    Mod getMod(String id);
 
     String getVersion();
 }

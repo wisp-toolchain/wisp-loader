@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'maven-publish'
-    id 'wisp-gradle' version '1.0-SNAPSHOT'
+    id 'wisp-gradle' version '1.2-SNAPSHOT'
 }
 
 group = 'me.alphamode.wisp'
@@ -28,7 +28,7 @@ repositories {
     }
 }
 
-wisp.minecraft("23w32a")
+wisp.minecraft("24w09a")
 
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.9.1')
@@ -44,11 +44,13 @@ dependencies {
 
     implementation("com.mojang:logging:1.1.1")
 
-    implementation("net.fabricmc:tiny-remapper:0.8.7")
+    implementation("net.fabricmc:tiny-remapper:0.8.13+local")
     implementation("net.fabricmc:mapping-io:0.2.1")
 
-    implementation 'net.fabricmc:tiny-mappings-parser:0.3.0+build.17'
     implementation 'org.tomlj:tomlj:1.1.0'
+
+    implementation 'org.slf4j:slf4j-api:1.7.25'
+    implementation 'org.jetbrains:annotations:24.1.0'
 
     implementation("net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5") {
         exclude module: 'launchwrapper'

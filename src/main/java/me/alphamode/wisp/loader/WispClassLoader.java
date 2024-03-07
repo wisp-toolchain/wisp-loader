@@ -58,8 +58,6 @@ public class WispClassLoader extends SecureClassLoader {
     }
 
     public void addMod(Mod mod) throws IOException {
-        for (Path root : mod.getPaths())
-            addUrl(root.toUri().toURL());
         for (Path path : mod.getPaths()) {
 
             synchronized (this) {
@@ -72,6 +70,8 @@ public class WispClassLoader extends SecureClassLoader {
 
                 this.codeSources = newCodeSources;
             }
+
+            addUrl(path.toUri().toURL());
         }
     }
 

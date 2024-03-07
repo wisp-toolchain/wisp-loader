@@ -1,15 +1,18 @@
 package me.alphamode.wisp.loader.impl;
 
+import me.alphamode.wisp.env.Environment;
 import me.alphamode.wisp.loader.JarMod;
 import me.alphamode.wisp.loader.Main;
 import me.alphamode.wisp.loader.api.*;
 import me.alphamode.wisp.loader.impl.minecraft.WispLoaderPlugin;
 import me.alphamode.wisp.loader.impl.mixin.MixinLoaderPlugin;
+import org.jetbrains.annotations.Nullable;
 import org.tomlj.Toml;
 import org.tomlj.TomlParseResult;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
 import java.net.URLConnection;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -22,7 +25,8 @@ import java.util.TreeMap;
 import java.util.stream.Stream;
 
 public class WispLoaderImpl implements WispLoader {
-    public static final WispLoaderImpl INSTANCE = new WispLoaderImpl();//InitHelper.get();
+    public static final WispLoaderImpl INSTANCE = new WispLoaderImpl();
+    private final ModDiscoverer discoverer = new ModDiscoverer();
     private final SortedMap<String, LoaderPlugin> plugins = new TreeMap<>();
     private final SortedMap<String, Mod> buildingModList = new TreeMap<>();
     private Map<String, Mod> mods;
@@ -31,7 +35,16 @@ public class WispLoaderImpl implements WispLoader {
     public List<Path> load(ArgumentList argumentList) {
         plugins.put("wisp-loader", new WispLoaderPlugin());
         plugins.put("mixin", new MixinLoaderPlugin());
-        locateMods();
+        discoverer.locateMods(buildingModList);
+
+        discoverer.locatePlugins().forEach((id, plugin) -> {
+            try {
+                plugins.put(id, (LoaderPlugin) PluginContext.CLASS_LOADER.loadClass(plugin).getDeclaredConstructor().newInstance());
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                     NoSuchMethodException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         plugins.forEach((modId, mod) -> {
             if (plugins.containsKey(modId))
@@ -77,6 +90,15 @@ public class WispLoaderImpl implements WispLoader {
 
         this.mods = Map.copyOf(buildingModList);
 
+        mods.forEach((s, mod) -> {
+            if (plugins.containsKey(s))
+                return;
+            try {
+                PluginContext.CLASS_LOADER.addMod(mod);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         return context.getClassPath();
     }
@@ -96,15 +118,17 @@ public class WispLoaderImpl implements WispLoader {
                         TomlParseResult result = Toml.parse(modFile);
                         result.errors().forEach(error -> System.err.println(error.toString()));
                         String modId = result.getString("mod-id");
-                        if (result.contains("plugin")) {
+                        var jarMod = new JarMod(path, result);
+                        if (result.contains("plugin-id")) {
+                            PluginContext.CLASS_LOADER.addMod(jarMod);
                             try {
-                                this.plugins.put(modId, (LoaderPlugin) Class.forName(result.getString("plugin")).getDeclaredConstructor().newInstance());
+                                plugins.put(modId, (LoaderPlugin) PluginContext.CLASS_LOADER.loadClass(result.getString("plugin")).getDeclaredConstructor().newInstance());
                             } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
                                      NoSuchMethodException | ClassNotFoundException e) {
                                 throw new RuntimeException(e);
                             }
                         }
-                        buildingModList.put(modId, new JarMod(path, result));
+                        buildingModList.put(modId, jarMod);
                     }
                 }
             }
@@ -153,8 +177,21 @@ public class WispLoaderImpl implements WispLoader {
     }
 
     @Override
+    public Environment getEnvironment() {
+        return Environment.CLIENT;
+    }
+
+    @Override
     public Map<String, Mod> getMods() {
         return this.mods;
+    }
+
+    @Nullable
+    @Override
+    public Mod getMod(String id) {
+        if (!this.mods.containsKey(id))
+            return null;
+        return this.mods.get(id);
     }
 
     @Override
