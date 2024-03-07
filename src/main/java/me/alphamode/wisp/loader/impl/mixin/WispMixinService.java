@@ -3,6 +3,7 @@ package me.alphamode.wisp.loader.impl.mixin;
 import me.alphamode.wisp.loader.LibraryFinder;
 import me.alphamode.wisp.loader.api.WispLoader;
 import me.alphamode.wisp.loader.api.PluginContext;
+import me.alphamode.wisp.loader.api.extension.Extension;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.launch.platform.container.ContainerHandleURI;
@@ -23,7 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WispMixinService implements IMixinService, IClassProvider, IClassBytecodeProvider, ITransformerProvider, IClassTracker {
+public class WispMixinService implements IMixinService, IClassProvider, IClassBytecodeProvider, ITransformerProvider, IClassTracker, Extension {
     static IMixinTransformer transformer;
 
     /**

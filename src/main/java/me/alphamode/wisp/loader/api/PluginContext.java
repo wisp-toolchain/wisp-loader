@@ -1,6 +1,8 @@
 package me.alphamode.wisp.loader.api;
 
 import me.alphamode.wisp.loader.WispClassLoader;
+import me.alphamode.wisp.loader.api.extension.Extension;
+import me.alphamode.wisp.loader.api.extension.ExtensionType;
 import me.alphamode.wisp.loader.impl.minecraft.ClientGameLocator;
 import me.alphamode.wisp.loader.impl.minecraft.WispLoaderPlugin;
 
@@ -15,6 +17,7 @@ public class PluginContext {
     private GameLocator locator;
     private final List<ClassTransformer> transformers = new ArrayList<>();
     private final Map<String, Mod> buildingModList = new HashMap<>();
+    private final Map<String, Extension> extensions = new HashMap<>();
     private List<Path> classPath;
     private final ArgumentList argumentList;
 
@@ -57,5 +60,13 @@ public class PluginContext {
 
     public List<Path> getClassPath() {
         return this.classPath;
+    }
+
+    public <Ext extends Extension> void registerExtension(ExtensionType<Ext> type, Ext extension) {
+        extensions.put(type.getId(), extension);
+    }
+
+    public Map<String, ? extends Extension> getExtensions() {
+        return extensions;
     }
 }

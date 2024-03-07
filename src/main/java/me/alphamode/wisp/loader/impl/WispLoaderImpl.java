@@ -4,6 +4,8 @@ import me.alphamode.wisp.env.Environment;
 import me.alphamode.wisp.loader.JarMod;
 import me.alphamode.wisp.loader.Main;
 import me.alphamode.wisp.loader.api.*;
+import me.alphamode.wisp.loader.api.extension.Extension;
+import me.alphamode.wisp.loader.api.extension.ExtensionType;
 import me.alphamode.wisp.loader.impl.minecraft.WispLoaderPlugin;
 import me.alphamode.wisp.loader.impl.mixin.MixinLoaderPlugin;
 import org.jetbrains.annotations.Nullable;
@@ -12,7 +14,6 @@ import org.tomlj.TomlParseResult;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.URLConnection;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -29,6 +30,7 @@ public class WispLoaderImpl implements WispLoader {
     private final ModDiscoverer discoverer = new ModDiscoverer();
     private final SortedMap<String, LoaderPlugin> plugins = new TreeMap<>();
     private final SortedMap<String, Mod> buildingModList = new TreeMap<>();
+    private Map<String, ? extends Extension> extensions;
     private Map<String, Mod> mods;
     private GameLocator locator;
 
@@ -79,6 +81,7 @@ public class WispLoaderImpl implements WispLoader {
 
         plugins.forEach((modId, plugin) -> {
             plugin.init(context);
+            extensions = context.getExtensions();
             plugin.modifyMods(buildingModList);
             plugin.modifyClassPath(libs);
         });
@@ -197,6 +200,13 @@ public class WispLoaderImpl implements WispLoader {
     @Override
     public String getVersion() {
         return "wisp-loader";
+    }
+
+    @Override
+    public <Ext extends Extension> Ext getExtension(ExtensionType<Ext> type) {
+        if (this.extensions == null)
+            throw new RuntimeException("Extensions have not been initialized yet!");
+        return (Ext) this.extensions.get(type.getId());
     }
 
     public SortedMap<String, LoaderPlugin> getPlugins() {

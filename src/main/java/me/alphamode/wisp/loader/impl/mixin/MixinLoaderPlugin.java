@@ -3,6 +3,7 @@ package me.alphamode.wisp.loader.impl.mixin;
 import me.alphamode.wisp.loader.JarMod;
 import me.alphamode.wisp.loader.api.Mod;
 import me.alphamode.wisp.loader.api.PluginContext;
+import me.alphamode.wisp.loader.api.extension.ExtensionType;
 import me.alphamode.wisp.loader.impl.InternalPlugin;
 import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.MixinEnvironment;
@@ -13,6 +14,8 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 public class MixinLoaderPlugin extends InternalPlugin {
+    public static ExtensionType<WispMixinService> SERVICE_EXTENSION = new ExtensionType<>("mixin", WispMixinService.class) {};
+
     @Override
     public void init(PluginContext context) {
         System.setProperty("mixin.bootstrapService", WispMixinBootstrap.class.getName());
@@ -31,6 +34,8 @@ public class MixinLoaderPlugin extends InternalPlugin {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
+        context.registerExtension(SERVICE_EXTENSION, (WispMixinService) WispMixinService.getTransformer());
     }
 
     @Override
