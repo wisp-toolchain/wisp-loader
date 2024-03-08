@@ -1,6 +1,8 @@
 package me.alphamode.wisp.loader.impl;
 
 import me.alphamode.wisp.loader.JarMod;
+import me.alphamode.wisp.loader.Main;
+import me.alphamode.wisp.loader.api.LoaderPlugin;
 import me.alphamode.wisp.loader.api.Mod;
 import me.alphamode.wisp.loader.api.PluginContext;
 import me.alphamode.wisp.loader.api.mod.ModLocator;
@@ -8,6 +10,8 @@ import org.tomlj.Toml;
 import org.tomlj.TomlParseResult;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URLConnection;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -37,6 +41,24 @@ public class ModDiscoverer implements ModLocator {
                 throw new RuntimeException(e);
             }
         }
+        try {
+            ModDiscoverer.class.getClassLoader().getResources("wisp.mod.toml").asIterator().forEachRemaining(url -> {
+                try {
+                    URLConnection jarURLConnection = url.openConnection();
+                    TomlParseResult result = Toml.parse(jarURLConnection.getInputStream());
+                    result.errors().forEach(error -> System.err.println(error.toString()));
+
+                    if (result.contains("plugin-id")) {
+                        String modId = result.getString("plugin-id");
+                        plugins.put(modId, result.getString("plugin"));
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         return plugins;
     }
 
@@ -65,6 +87,25 @@ public class ModDiscoverer implements ModLocator {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        try {
+            ModDiscoverer.class.getClassLoader().getResources("wisp.mod.toml").asIterator().forEachRemaining(url -> {
+                try {
+                    URLConnection jarURLConnection = url.openConnection();
+                    TomlParseResult result = Toml.parse(jarURLConnection.getInputStream());
+                    result.errors().forEach(error -> System.err.println(error.toString()));
+
+                    if (result.contains("mod-id")) {
+                        String modId = result.getString("mod-id");
+                        buildingModList.put(modId, new JarMod(Path.of(url.getPath()), result));
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

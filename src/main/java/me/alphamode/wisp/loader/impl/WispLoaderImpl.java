@@ -125,7 +125,7 @@ public class WispLoaderImpl implements WispLoader {
                         if (result.contains("plugin-id")) {
                             PluginContext.CLASS_LOADER.addMod(jarMod);
                             try {
-                                plugins.put(modId, (LoaderPlugin) PluginContext.CLASS_LOADER.loadClass(result.getString("plugin")).getDeclaredConstructor().newInstance());
+                                plugins.put(result.getString("plugin-id"), (LoaderPlugin) PluginContext.CLASS_LOADER.loadClass(result.getString("plugin")).getDeclaredConstructor().newInstance());
                             } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
                                      NoSuchMethodException | ClassNotFoundException e) {
                                 throw new RuntimeException(e);
@@ -135,8 +135,8 @@ public class WispLoaderImpl implements WispLoader {
                     }
                 }
             }
-        } catch (IOException ignored) {
-
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
         try {
