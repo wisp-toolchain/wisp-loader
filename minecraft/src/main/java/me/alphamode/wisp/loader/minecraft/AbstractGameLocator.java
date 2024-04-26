@@ -1,4 +1,4 @@
-package me.alphamode.wisp.loader.impl.minecraft;
+package me.alphamode.wisp.loader.minecraft;
 
 import me.alphamode.wisp.loader.api.ArgumentList;
 import me.alphamode.wisp.loader.api.GameLocator;

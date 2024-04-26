@@ -48,6 +48,8 @@ public class Main {
             loaderPlugin.onFinish(loader.getMods());
         });
 
+        classLoader.validParentCodeSources.add(LibraryFinder.getCodeSource(WispLoader.class));
+
         try {
             locator.launch(argumentList);
         } catch (Throwable e) {

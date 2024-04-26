@@ -1,0 +1,3 @@
+plugin-id="mixin"
+plugin="me.alphamode.wisp.loader.mixin.MixinLoaderPlugin"
+version="0.12.5+mixin.0.8.5"

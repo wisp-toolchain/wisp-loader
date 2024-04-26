@@ -1,4 +1,4 @@
-package me.alphamode.wisp.loader.impl.mixin;
+package me.alphamode.wisp.loader.mixin;
 
 import org.spongepowered.asm.service.IMixinServiceBootstrap;
 

@@ -1,4 +1,4 @@
-package me.alphamode.wisp.loader.impl.minecraft;
+package me.alphamode.wisp.loader.minecraft;
 
 import java.nio.file.Path;
 import java.util.ArrayList;

@@ -3,8 +3,6 @@ package me.alphamode.wisp.loader.api;
 import me.alphamode.wisp.loader.WispClassLoader;
 import me.alphamode.wisp.loader.api.extension.Extension;
 import me.alphamode.wisp.loader.api.extension.ExtensionType;
-import me.alphamode.wisp.loader.impl.minecraft.ClientGameLocator;
-import me.alphamode.wisp.loader.impl.minecraft.WispLoaderPlugin;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -32,7 +30,7 @@ public class PluginContext {
      * Only one of these can exist. Registering one will override the default game locator.
      */
     public void registerGameLocator(GameLocator locator) {
-        if (this.locator instanceof ClientGameLocator || this.locator == null)
+        if (this.locator == null)
             this.locator = locator;
         else
             throw new RuntimeException(String.format("Only one game locator can be registered! %s %s", locator, this.locator));

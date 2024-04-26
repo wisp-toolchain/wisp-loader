@@ -1,0 +1,3 @@
+plugin-id="minecraft"
+plugin="me.alphamode.wisp.loader.minecraft.MinecraftLoaderPlugin"
+version="1.0"

@@ -1,12 +1,10 @@
-package me.alphamode.wisp.loader.impl.minecraft;
+package me.alphamode.wisp.loader.minecraft;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.alphamode.wisp.loader.AddConstructorMappingVisitor;
-import me.alphamode.wisp.loader.api.GameLocator;
-import me.alphamode.wisp.loader.api.PluginContext;
 import me.alphamode.wisp.loader.api.WispLoader;
 import net.fabricmc.mappingio.MappingWriter;
 import net.fabricmc.mappingio.adapter.MappingSourceNsSwitch;

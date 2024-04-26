@@ -1,22 +1,22 @@
-package me.alphamode.wisp.loader.impl.minecraft;
+package me.alphamode.wisp.loader.minecraft;
 
 import me.alphamode.wisp.loader.LibraryFinder;
+import me.alphamode.wisp.loader.Main;
 import me.alphamode.wisp.loader.WispClassLoader;
-import me.alphamode.wisp.loader.api.LoaderPlugin;
 import me.alphamode.wisp.loader.api.Mod;
 import me.alphamode.wisp.loader.api.PluginContext;
 import me.alphamode.wisp.loader.api.WispLoader;
 import me.alphamode.wisp.loader.impl.EntrypointClassTransformer;
 import me.alphamode.wisp.loader.impl.InternalPlugin;
+import net.minecraft.client.Minecraft;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.security.CodeSource;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
-public class WispLoaderPlugin extends InternalPlugin {
+public class MinecraftLoaderPlugin extends InternalPlugin {
 
     @Override
     public void preInit(PluginContext context) {

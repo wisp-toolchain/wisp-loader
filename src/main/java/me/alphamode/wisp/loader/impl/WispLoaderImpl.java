@@ -6,8 +6,6 @@ import me.alphamode.wisp.loader.Main;
 import me.alphamode.wisp.loader.api.*;
 import me.alphamode.wisp.loader.api.extension.Extension;
 import me.alphamode.wisp.loader.api.extension.ExtensionType;
-import me.alphamode.wisp.loader.impl.minecraft.WispLoaderPlugin;
-import me.alphamode.wisp.loader.impl.mixin.MixinLoaderPlugin;
 import org.jetbrains.annotations.Nullable;
 import org.tomlj.Toml;
 import org.tomlj.TomlParseResult;
@@ -35,8 +33,6 @@ public class WispLoaderImpl implements WispLoader {
     private GameLocator locator;
 
     public List<Path> load(ArgumentList argumentList) {
-        plugins.put("wisp-loader", new WispLoaderPlugin());
-        plugins.put("mixin", new MixinLoaderPlugin());
         discoverer.locateMods(buildingModList);
 
         discoverer.locatePlugins().forEach((id, plugin) -> {
@@ -221,5 +217,18 @@ public class WispLoaderImpl implements WispLoader {
 
             return instance;
         }
+    }
+
+    public static void verifyNotInTargetCl(Class<?> cls) {
+        if (cls.getClassLoader().getClass().getName().equals("me.alphamode.wisp.loader.WispClassLoader")) {
+            // This usually happens when fabric loader has been added to the target class loader. This is a bad state.
+            // Such additions may be indirect, a JAR can use the Class-Path manifest attribute to drag additional
+            // libraries with it, likely recursively.
+            throw new IllegalStateException("trying to load "+cls.getName()+" from target class loader");
+        }
+    }
+
+    static {
+        verifyNotInTargetCl(WispLoaderImpl.class);
     }
 }

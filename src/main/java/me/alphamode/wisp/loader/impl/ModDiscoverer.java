@@ -42,7 +42,7 @@ public class ModDiscoverer implements ModLocator {
             }
         }
         try {
-            ModDiscoverer.class.getClassLoader().getResources("wisp.mod.toml").asIterator().forEachRemaining(url -> {
+            PluginContext.CLASS_LOADER.getResources("wisp.mod.toml").asIterator().forEachRemaining(url -> {
                 try {
                     URLConnection jarURLConnection = url.openConnection();
                     TomlParseResult result = Toml.parse(jarURLConnection.getInputStream());
@@ -64,6 +64,8 @@ public class ModDiscoverer implements ModLocator {
 
     public List<Path> locateMods() {
         Path modsFolder = Path.of("mods");
+        if (!Files.exists(modsFolder))
+            modsFolder.toFile().mkdirs();
         try (Stream<Path> files = Files.list(modsFolder)) {
             return files.toList();
         } catch (IOException e) {
@@ -90,7 +92,7 @@ public class ModDiscoverer implements ModLocator {
         }
 
         try {
-            ModDiscoverer.class.getClassLoader().getResources("wisp.mod.toml").asIterator().forEachRemaining(url -> {
+            PluginContext.CLASS_LOADER.getResources("wisp.mod.toml").asIterator().forEachRemaining(url -> {
                 try {
                     URLConnection jarURLConnection = url.openConnection();
                     TomlParseResult result = Toml.parse(jarURLConnection.getInputStream());

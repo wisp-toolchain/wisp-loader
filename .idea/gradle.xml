@@ -9,6 +9,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/minecraft" />
+            <option value="$PROJECT_DIR$/mixin" />
           </set>
         </option>
       </GradleProjectSettings>
