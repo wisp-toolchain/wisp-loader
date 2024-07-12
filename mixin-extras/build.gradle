@@ -1,0 +1,16 @@
+group = "me.alphamode.wisp.mixin"
+version = "1.0"
+
+dependencies {
+    api project(":")
+
+    implementation("net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5") {
+        exclude module: 'launchwrapper'
+        exclude module: 'guava'
+    }
+    implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.3.5"))
+}
+
+test {
+    useJUnitPlatform()
+}

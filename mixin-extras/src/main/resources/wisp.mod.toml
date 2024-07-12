@@ -1,0 +1,3 @@
+plugin-id="mixin-extras"
+plugin="me.alphamode.wisp.loader.mixin.extras.MixinExtrasLoaderPlugin"
+version="0.3.5"

@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'me.alphamode.wisp'
-version = '1.0'
+version = '1.1'
 
 allprojects {
     apply plugin: 'java'
@@ -67,10 +67,33 @@ java {
     withSourcesJar()
 }
 
+sourcesJar {
+    from sourceSets.main.allSource
+    from project(":mixin").sourceSets.main.allSource
+    from project(":mixin-extras").sourceSets.main.allSource
+    from project(":minecraft").sourceSets.main.allSource
+}
+
+task fatJar(type: org.gradle.jvm.tasks.Jar) {
+    from sourceSets.main.output
+    from project(":mixin").sourceSets.main.output
+    from project(":mixin-extras").sourceSets.main.output
+    from project(":minecraft").sourceSets.main.output
+    from("LICENSE") {
+        rename { "${it}_${project.archivesBaseName}"}
+    }
+
+    archiveClassifier = "fat"
+
+    outputs.upToDateWhen { false }
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            from components.java
+            // add all the jars that should be included when publishing to maven
+            artifact(fatJar)
+//            artifact(sourcesJar)
         }
     }
 
