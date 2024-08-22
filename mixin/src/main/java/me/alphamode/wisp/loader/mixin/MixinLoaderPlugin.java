@@ -45,9 +45,7 @@ public class MixinLoaderPlugin extends InternalPlugin {
             TomlComponent toml = mod.getComponent(TomlComponent.class);
             if (toml != null && toml.toml().contains("mixins")) {
                 TomlArray mixins = toml.toml().getArray("mixins");
-                for (int i = 0; i < mixins.size(); i++) {
-                    Mixins.addConfiguration(mixins.getString(i));
-                }
+                mod.addComponent(new MixinComponent(mixins.toList().toArray(String[]::new)));
             }
         }
     }
