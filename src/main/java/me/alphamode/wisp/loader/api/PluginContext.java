@@ -3,6 +3,7 @@ package me.alphamode.wisp.loader.api;
 import me.alphamode.wisp.loader.WispClassLoader;
 import me.alphamode.wisp.loader.api.extension.Extension;
 import me.alphamode.wisp.loader.api.extension.ExtensionType;
+import me.alphamode.wisp.loader.api.mod.Mod;
 
 import java.nio.file.Path;
 import java.util.ArrayList;

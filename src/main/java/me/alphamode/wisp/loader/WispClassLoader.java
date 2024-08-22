@@ -1,7 +1,8 @@
 package me.alphamode.wisp.loader;
 
 import me.alphamode.wisp.loader.api.ClassTransformer;
-import me.alphamode.wisp.loader.api.Mod;
+import me.alphamode.wisp.loader.api.components.ClasspathComponent;
+import me.alphamode.wisp.loader.api.mod.Mod;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -58,20 +59,22 @@ public class WispClassLoader extends SecureClassLoader {
     }
 
     public void addMod(Mod mod) throws IOException {
-        for (Path path : mod.getPaths()) {
+        for (ClasspathComponent c : mod.getComponents(ClasspathComponent.class)) {
+            for (Path path : c.paths()) {
 
-            synchronized (this) {
-                Set<Path> codeSources = this.codeSources;
-                if (codeSources.contains(path)) return;
+                synchronized (this) {
+                    Set<Path> codeSources = this.codeSources;
+                    if (codeSources.contains(path)) return;
 
-                Set<Path> newCodeSources = new HashSet<>(codeSources.size() + 1, 1);
-                newCodeSources.addAll(codeSources);
-                newCodeSources.add(path);
+                    Set<Path> newCodeSources = new HashSet<>(codeSources.size() + 1, 1);
+                    newCodeSources.addAll(codeSources);
+                    newCodeSources.add(path);
 
-                this.codeSources = newCodeSources;
+                    this.codeSources = newCodeSources;
+                }
+
+                addUrl(path.toUri().toURL());
             }
-
-            addUrl(path.toUri().toURL());
         }
     }
 

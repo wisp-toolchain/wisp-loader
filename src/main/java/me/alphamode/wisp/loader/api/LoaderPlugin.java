@@ -1,5 +1,8 @@
 package me.alphamode.wisp.loader.api;
 
+import me.alphamode.wisp.loader.api.mod.LoadingMod;
+import me.alphamode.wisp.loader.api.mod.Mod;
+
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +26,7 @@ public interface LoaderPlugin {
      * You cannot remove any mod that provides a loader plugin.
      * @param mods The current mod list
      */
-    default void modifyMods(Map<String, Mod> mods) {}
+    default void modifyMods(Map<String, LoadingMod> mods) {}
 
     /**
      * Allows you to modify the games runtime classpath before the game launches.

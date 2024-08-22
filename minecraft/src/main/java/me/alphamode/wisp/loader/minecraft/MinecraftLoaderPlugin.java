@@ -1,14 +1,13 @@
 package me.alphamode.wisp.loader.minecraft;
 
 import me.alphamode.wisp.loader.LibraryFinder;
-import me.alphamode.wisp.loader.Main;
 import me.alphamode.wisp.loader.WispClassLoader;
-import me.alphamode.wisp.loader.api.Mod;
+import me.alphamode.wisp.loader.api.components.ClasspathComponent;
+import me.alphamode.wisp.loader.api.mod.Mod;
 import me.alphamode.wisp.loader.api.PluginContext;
 import me.alphamode.wisp.loader.api.WispLoader;
 import me.alphamode.wisp.loader.impl.EntrypointClassTransformer;
 import me.alphamode.wisp.loader.impl.InternalPlugin;
-import net.minecraft.client.Minecraft;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -46,8 +45,7 @@ public class MinecraftLoaderPlugin extends InternalPlugin {
     @Override
     public void onFinish(Map<String, Mod> mods) {
         mods.forEach((modId, mod) -> {
-            List<Path> roots = mod.getPaths();
-            for (Path rootPath : roots) {
+            if (mod.hasComponent(ClasspathComponent.class)) {
                 try {
                     PluginContext.CLASS_LOADER.addMod(mod);
                 } catch (IOException e) {

@@ -1,16 +1,14 @@
 package me.alphamode.wisp.loader.impl;
 
-import me.alphamode.wisp.loader.JarMod;
-import me.alphamode.wisp.loader.Main;
-import me.alphamode.wisp.loader.api.LoaderPlugin;
-import me.alphamode.wisp.loader.api.Mod;
+import me.alphamode.wisp.loader.api.components.ClasspathComponent;
+import me.alphamode.wisp.loader.api.components.TomlComponent;
+import me.alphamode.wisp.loader.api.mod.LoadingMod;
 import me.alphamode.wisp.loader.api.PluginContext;
 import me.alphamode.wisp.loader.api.mod.ModLocator;
 import org.tomlj.Toml;
 import org.tomlj.TomlParseResult;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URLConnection;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -73,7 +71,7 @@ public class ModDiscoverer implements ModLocator {
         }
     }
 
-    public void locateMods(SortedMap<String, Mod> buildingModList) {
+    public void locateMods(SortedMap<String, LoadingMod> buildingModList) {
         for (Path path : locateMods()) {
             try (FileSystem mod = FileSystems.newFileSystem(path)) {
                 var modFile = mod.getPath("wisp.mod.toml");
@@ -81,8 +79,10 @@ public class ModDiscoverer implements ModLocator {
                     TomlParseResult result = Toml.parse(modFile);
                     result.errors().forEach(error -> System.err.println(error.toString()));
                     if (result.contains("mod-id")) {
-                        String modId = result.getString("mod-id");
-                        var jarMod = new JarMod(path, result);
+                        String modId = result.getString("mod-id"); // path, result
+                        var jarMod = new LoadingModImpl(modId, result.getString("version"))
+                                .addComponent(new ClasspathComponent(path))
+                                .addComponent(new TomlComponent(result));
                         buildingModList.put(modId, jarMod);
                     }
                 }
@@ -100,7 +100,10 @@ public class ModDiscoverer implements ModLocator {
 
                     if (result.contains("mod-id")) {
                         String modId = result.getString("mod-id");
-                        buildingModList.put(modId, new JarMod(Path.of(url.getPath()), result));
+                        var mod = new LoadingModImpl(result.getString("mod-id"), result.getString("version"))
+                                .addComponent(new ClasspathComponent(Path.of(url.getPath())))
+                                .addComponent(new TomlComponent(result));
+                        buildingModList.put(modId, mod);
                     }
                 } catch (IOException e) {
                     throw new RuntimeException(e);

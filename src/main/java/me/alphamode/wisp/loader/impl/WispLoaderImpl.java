@@ -1,11 +1,14 @@
 package me.alphamode.wisp.loader.impl;
 
 import me.alphamode.wisp.env.Environment;
-import me.alphamode.wisp.loader.JarMod;
 import me.alphamode.wisp.loader.Main;
 import me.alphamode.wisp.loader.api.*;
+import me.alphamode.wisp.loader.api.components.ClasspathComponent;
+import me.alphamode.wisp.loader.api.components.TomlComponent;
 import me.alphamode.wisp.loader.api.extension.Extension;
 import me.alphamode.wisp.loader.api.extension.ExtensionType;
+import me.alphamode.wisp.loader.api.mod.LoadingMod;
+import me.alphamode.wisp.loader.api.mod.Mod;
 import org.jetbrains.annotations.Nullable;
 import org.tomlj.Toml;
 import org.tomlj.TomlParseResult;
@@ -27,7 +30,7 @@ public class WispLoaderImpl implements WispLoader {
     public static final WispLoaderImpl INSTANCE = new WispLoaderImpl();
     private final ModDiscoverer discoverer = new ModDiscoverer();
     private final SortedMap<String, LoaderPlugin> plugins = new TreeMap<>();
-    private final SortedMap<String, Mod> buildingModList = new TreeMap<>();
+    private final SortedMap<String, LoadingMod> buildingModList = new TreeMap<>();
     private Map<String, ? extends Extension> extensions;
     private Map<String, Mod> mods;
     private GameLocator locator;
@@ -48,7 +51,7 @@ public class WispLoaderImpl implements WispLoader {
             if (plugins.containsKey(modId))
                 return;
             try {
-                PluginContext.CLASS_LOADER.addMod(buildingModList.get(modId));
+                PluginContext.CLASS_LOADER.addMod(buildingModList.get(modId).toMod());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -87,10 +90,12 @@ public class WispLoaderImpl implements WispLoader {
         for (ClassTransformer transformer : context.getTransformers())
             PluginContext.CLASS_LOADER.registerClassTransformer(transformer);
 
-        this.mods = Map.copyOf(buildingModList);
+        Map<String, Mod> tempMods = new TreeMap<>();
+        buildingModList.forEach((id, mod) -> tempMods.put(id, mod.toMod()));
+        this.mods = Map.copyOf(tempMods);
 
-        mods.forEach((s, mod) -> {
-            if (plugins.containsKey(s))
+        mods.forEach((id, mod) -> {
+            if (plugins.containsKey(id))
                 return;
             try {
                 PluginContext.CLASS_LOADER.addMod(mod);
@@ -117,9 +122,12 @@ public class WispLoaderImpl implements WispLoader {
                         TomlParseResult result = Toml.parse(modFile);
                         result.errors().forEach(error -> System.err.println(error.toString()));
                         String modId = result.getString("mod-id");
-                        var jarMod = new JarMod(path, result);
+                        String version = result.getString("version"); // path, result
+                        var jarMod = new LoadingModImpl(modId, version)
+                                .addComponent(new ClasspathComponent(path))
+                                .addComponent(new TomlComponent(result));
                         if (result.contains("plugin-id")) {
-                            PluginContext.CLASS_LOADER.addMod(jarMod);
+//                            PluginContext.CLASS_LOADER.addMod(jarMod);
                             try {
                                 plugins.put(result.getString("plugin-id"), (LoaderPlugin) PluginContext.CLASS_LOADER.loadClass(result.getString("plugin")).getDeclaredConstructor().newInstance());
                             } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
@@ -150,7 +158,9 @@ public class WispLoaderImpl implements WispLoader {
                             throw new RuntimeException(e);
                         }
                     }
-                    buildingModList.put(modId, new JarMod(Path.of(url.getPath()), result));
+                    buildingModList.put(modId, new LoadingModImpl(modId, result.getString("version"))
+                            .addComponent(new ClasspathComponent(Path.of(url.getPath())))
+                            .addComponent(new TomlComponent(result)));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

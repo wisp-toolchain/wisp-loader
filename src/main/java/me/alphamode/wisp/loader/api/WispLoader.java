@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import me.alphamode.wisp.env.Environment;
 import me.alphamode.wisp.loader.api.extension.Extension;
 import me.alphamode.wisp.loader.api.extension.ExtensionType;
+import me.alphamode.wisp.loader.api.mod.Mod;
 import me.alphamode.wisp.loader.impl.WispLoaderImpl;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
