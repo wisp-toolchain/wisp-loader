@@ -58,23 +58,21 @@ public class WispClassLoader extends SecureClassLoader {
         this.urlLoader.addURL(url);
     }
 
-    public void addMod(Mod mod) throws IOException {
-        for (ClasspathComponent c : mod.getComponents(ClasspathComponent.class)) {
-            for (Path path : c.paths()) {
+    public void addCodeSources(Path... paths) throws IOException {
+        for (Path path : paths) {
 
-                synchronized (this) {
-                    Set<Path> codeSources = this.codeSources;
-                    if (codeSources.contains(path)) return;
+            synchronized (this) {
+                Set<Path> codeSources = this.codeSources;
+                if (codeSources.contains(path)) return;
 
-                    Set<Path> newCodeSources = new HashSet<>(codeSources.size() + 1, 1);
-                    newCodeSources.addAll(codeSources);
-                    newCodeSources.add(path);
+                Set<Path> newCodeSources = new HashSet<>(codeSources.size() + 1, 1);
+                newCodeSources.addAll(codeSources);
+                newCodeSources.add(path);
 
-                    this.codeSources = newCodeSources;
-                }
-
-                addUrl(path.toUri().toURL());
+                this.codeSources = newCodeSources;
             }
+
+            addUrl(path.toUri().toURL());
         }
     }
 

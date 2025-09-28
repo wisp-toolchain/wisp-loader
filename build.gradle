@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'me.alphamode.wisp'
-version = '1.1'
+version = '0.1.3'
 
 allprojects {
     apply plugin: 'java'
@@ -13,7 +13,9 @@ allprojects {
 
     repositories {
         mavenCentral()
-        mavenLocal()
+        maven {
+            url = "https://maven.alphasmoddingserver.com/snapshots"
+        }
         maven {
             url = "https://libraries.minecraft.net"
         }
@@ -23,13 +25,6 @@ allprojects {
         maven {
             url = 'https://plugins.gradle.org/m2/'
         }
-
-        maven {
-            url 'https://repo.sleeping.town'
-            content {
-                includeGroup 'com.unascribed'
-            }
-        }
     }
 }
 
@@ -37,16 +32,14 @@ dependencies {
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
-    runtimeOnly project(":minecraft")
-    runtimeOnly project(":mixin")
+//    runtimeOnly project(":minecraft")
+//    runtimeOnly project(":mixin")
 
 //    implementation("me.alphamode:wisptestmod:1.0-SNAPSHOT")
-    api("me.alphamode.wisp.env:WispEnv:1.0")
+    api("me.alphamode.wisp:wisp-env:1.0")
 
     api 'org.ow2.sat4j:org.ow2.sat4j.core:2.3.6'
     api 'org.ow2.sat4j:org.ow2.sat4j.pb:2.3.6'
-
-    api 'com.unascribed:flexver-java:1.0.2'
 
     api("com.mojang:logging:1.1.1")
 
@@ -69,16 +62,16 @@ java {
 
 sourcesJar {
     from sourceSets.main.allSource
-    from project(":mixin").sourceSets.main.allSource
-    from project(":mixin-extras").sourceSets.main.allSource
-    from project(":minecraft").sourceSets.main.allSource
+//    from project(":mixin").sourceSets.main.allSource
+//    from project(":mixin-extras").sourceSets.main.allSource
+//    from project(":minecraft").sourceSets.main.allSource
 }
 
 task fatJar(type: org.gradle.jvm.tasks.Jar) {
     from sourceSets.main.output
-    from project(":mixin").sourceSets.main.output
-    from project(":mixin-extras").sourceSets.main.output
-    from project(":minecraft").sourceSets.main.output
+//    from project(":mixin").sourceSets.main.output
+//    from project(":mixin-extras").sourceSets.main.output
+//    from project(":minecraft").sourceSets.main.output
     from("LICENSE") {
         rename { "${it}_${project.archivesBaseName}"}
     }
@@ -88,20 +81,25 @@ task fatJar(type: org.gradle.jvm.tasks.Jar) {
     outputs.upToDateWhen { false }
 }
 
+def ENV = System.getenv()
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
             // add all the jars that should be included when publishing to maven
-            artifact(fatJar)
+            from components.java
+//            artifact(fatJar)
 //            artifact(sourcesJar)
         }
     }
 
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
     repositories {
-        // Add repositories to publish to here.
-        // Notice: This block does NOT have the same function as the block in the top level.
-        // The repositories here will be used for publishing your artifact, not for
-        // retrieving dependencies.
+        maven {
+            url ENV.MAVEN_URL
+            credentials {
+                username ENV.MAVEN_USER
+                password ENV.MAVEN_PASSWORD
+            }
+        }
     }
 }

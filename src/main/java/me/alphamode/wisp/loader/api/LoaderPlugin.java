@@ -37,7 +37,15 @@ public interface LoaderPlugin {
     @Deprecated
     default void modifyClassPath(List<Path> classPaths) {}
 
-    default void onFinish(Map<String, Mod> mods) {
+    /**
+     * Used to modify components of mods. At this point all mods declared and cannot be modified, if you wish to modify mods or add new mods please use {@link LoaderPlugin#modifyMods(Map)}
+     * @param mods
+     */
+    default void onModsFinalized(Map<String, LoadingMod> mods) {}
 
-    }
+    /**
+     * Used for 
+     * @param mods
+     */
+    default void onFinish(Map<String, Mod> mods) {}
 }

@@ -1,7 +1,9 @@
 pluginManagement {
     repositories {
+        maven {
+            url = "https://maven.alphasmoddingserver.com/snapshots/"
+        }
         gradlePluginPortal()
-        mavenLocal()
         maven {
             url = "https://maven.fabricmc.net/"
         }

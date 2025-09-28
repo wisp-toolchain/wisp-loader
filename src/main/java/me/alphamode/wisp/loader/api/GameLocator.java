@@ -19,5 +19,7 @@ public interface GameLocator {
      */
     List<Path> getGameClassPaths(String[] args);
 
+    String getMainClass();
+
     void launch(ArgumentList arguments);
 }

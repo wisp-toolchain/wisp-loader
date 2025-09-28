@@ -1,5 +1,6 @@
 package me.alphamode.wisp.loader.impl;
 
+import me.alphamode.wisp.loader.api.WispLoader;
 import me.alphamode.wisp.loader.api.components.ClasspathComponent;
 import me.alphamode.wisp.loader.api.components.TomlComponent;
 import me.alphamode.wisp.loader.api.mod.LoadingMod;
@@ -32,7 +33,7 @@ public class ModDiscoverer implements ModLocator {
                     String modId = result.getString("plugin-id");
                     if (result.contains("plugin-id")) {
                         plugins.put(modId, result.getString("plugin"));
-                        PluginContext.CLASS_LOADER.addUrl(path.toUri().toURL());
+                        PluginContext.CLASS_LOADER.addCodeSources(path);
                     }
                 }
             } catch (IOException e) {
@@ -49,6 +50,7 @@ public class ModDiscoverer implements ModLocator {
                     if (result.contains("plugin-id")) {
                         String modId = result.getString("plugin-id");
                         plugins.put(modId, result.getString("plugin"));
+                        PluginContext.CLASS_LOADER.addCodeSources(Path.of(url.getPath()));
                     }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -73,21 +75,26 @@ public class ModDiscoverer implements ModLocator {
 
     public void locateMods(SortedMap<String, LoadingMod> buildingModList) {
         for (Path path : locateMods()) {
-            try (FileSystem mod = FileSystems.newFileSystem(path)) {
-                var modFile = mod.getPath("wisp.mod.toml");
-                if (Files.exists(modFile)) {
-                    TomlParseResult result = Toml.parse(modFile);
-                    result.errors().forEach(error -> System.err.println(error.toString()));
-                    if (result.contains("mod-id")) {
-                        String modId = result.getString("mod-id"); // path, result
-                        var jarMod = new LoadingModImpl(modId, result.getString("version"))
-                                .addComponent(new ClasspathComponent(path))
-                                .addComponent(new TomlComponent(result));
-                        buildingModList.put(modId, jarMod);
+            try {
+                try (FileSystem mod = FileSystems.newFileSystem(path)) {
+                    var modFile = mod.getPath("wisp.mod.toml");
+                    if (Files.exists(modFile)) {
+                        TomlParseResult result = Toml.parse(modFile);
+                        result.errors().forEach(error -> System.err.println(error.toString()));
+                        if (result.contains("mod-id")) {
+                            String modId = result.getString("mod-id"); // path, result
+                            var jarMod = new LoadingModImpl(modId, result.getString("version"))
+                                    .addComponent(new ClasspathComponent(path))
+                                    .addComponent(new TomlComponent(result));
+                            buildingModList.put(modId, jarMod);
+                        }
                     }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            } catch (Exception e) {
+                WispLoader.LOGGER.error("Error loading mod path: " + path);
+                e.printStackTrace();
             }
         }
 

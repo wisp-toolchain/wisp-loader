@@ -17,6 +17,4 @@ public abstract class AbstractGameLocator implements GameLocator {
             throw new RuntimeException(e);
         }
     }
-
-    public abstract String getMainClass();
 }

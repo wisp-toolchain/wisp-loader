@@ -45,9 +45,9 @@ public class MinecraftLoaderPlugin extends InternalPlugin {
     @Override
     public void onFinish(Map<String, Mod> mods) {
         mods.forEach((modId, mod) -> {
-            if (mod.hasComponent(ClasspathComponent.class)) {
+            for (ClasspathComponent c : mod.getComponents(ClasspathComponent.class)) {
                 try {
-                    PluginContext.CLASS_LOADER.addMod(mod);
+                    PluginContext.CLASS_LOADER.addCodeSources(c.paths().toArray(Path[]::new));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

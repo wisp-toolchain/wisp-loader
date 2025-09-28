@@ -1,3 +1,7 @@
+plugins {
+    id 'maven-publish'
+}
+
 group = "me.alphamode.wisp.mixin"
 version = "1.0"
 
@@ -12,4 +16,29 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+java {
+    withSourcesJar()
+}
+
+def ENV = System.getenv()
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            // add all the jars that should be included when publishing to maven
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            url ENV.MAVEN_URL
+            credentials {
+                username ENV.MAVEN_USER
+                password ENV.MAVEN_PASSWORD
+            }
+        }
+    }
 }

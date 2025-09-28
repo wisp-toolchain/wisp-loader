@@ -1,11 +1,18 @@
 plugins {
-    id 'wisp-gradle' version '1.2-SNAPSHOT'
+    id 'wisp-gradle' version '1.0-SNAPSHOT'
+    id 'maven-publish'
 }
 
-wisp.minecraft("24w12a")
+repositories {
+    maven {
+        url = "https://maven.alphasmoddingserver.com/snapshots"
+    }
+}
+
+wisp.minecraft("1.21.8")
 
 group = "me.alphamode.wisp.minecraft"
-version = "1.0"
+version = "1.2"
 
 dependencies {
     implementation project(":")
@@ -14,4 +21,29 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+java {
+    withSourcesJar()
+}
+
+def ENV = System.getenv()
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            // add all the jars that should be included when publishing to maven
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            url ENV.MAVEN_URL
+            credentials {
+                username ENV.MAVEN_USER
+                password ENV.MAVEN_PASSWORD
+            }
+        }
+    }
 }

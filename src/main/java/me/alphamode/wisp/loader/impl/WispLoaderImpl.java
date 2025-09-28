@@ -20,10 +20,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class WispLoaderImpl implements WispLoader {
@@ -43,16 +40,6 @@ public class WispLoaderImpl implements WispLoader {
                 plugins.put(id, (LoaderPlugin) PluginContext.CLASS_LOADER.loadClass(plugin).getDeclaredConstructor().newInstance());
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
                      NoSuchMethodException | ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        plugins.forEach((modId, mod) -> {
-            if (plugins.containsKey(modId))
-                return;
-            try {
-                PluginContext.CLASS_LOADER.addMod(buildingModList.get(modId).toMod());
-            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         });
@@ -90,19 +77,13 @@ public class WispLoaderImpl implements WispLoader {
         for (ClassTransformer transformer : context.getTransformers())
             PluginContext.CLASS_LOADER.registerClassTransformer(transformer);
 
+        Map<String, LoadingMod> finalModList = Map.copyOf(buildingModList);
+        plugins.forEach((modId, plugin) -> {
+            plugin.onModsFinalized(finalModList);
+        });
         Map<String, Mod> tempMods = new TreeMap<>();
         buildingModList.forEach((id, mod) -> tempMods.put(id, mod.toMod()));
         this.mods = Map.copyOf(tempMods);
-
-        mods.forEach((id, mod) -> {
-            if (plugins.containsKey(id))
-                return;
-            try {
-                PluginContext.CLASS_LOADER.addMod(mod);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
 
         return context.getClassPath();
     }
