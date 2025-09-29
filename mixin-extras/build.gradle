@@ -1,14 +1,14 @@
 group = "me.alphamode.wisp.mixin"
-version = "1.0"
+version = "1.1"
 
 dependencies {
     api project(":")
 
-    implementation("net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5") {
+    implementation("net.fabricmc:sponge-mixin:0.16.3+mixin.0.8.7") {
         exclude module: 'launchwrapper'
         exclude module: 'guava'
     }
-    implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.3.5"))
+    implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.5.0"))
 }
 
 test {

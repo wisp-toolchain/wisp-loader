@@ -188,9 +188,14 @@ public class WispMixinService implements IMixinService, IClassProvider, IClassBy
 
     @Override
     public ClassNode getClassNode(String name, boolean runTransformers) throws IOException {
+        return getClassNode(name, runTransformers, 0);
+    }
+
+    @Override
+    public ClassNode getClassNode(String name, boolean runTransformers, int readerFlags) throws IOException {
         ClassReader reader = new ClassReader(PluginContext.CLASS_LOADER.getRawClassByteArray(name, runTransformers));
         ClassNode node = new ClassNode();
-        reader.accept(node, 0);
+        reader.accept(node, readerFlags);
         return node;
     }
 
