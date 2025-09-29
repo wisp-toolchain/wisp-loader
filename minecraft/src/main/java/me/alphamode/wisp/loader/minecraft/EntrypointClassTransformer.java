@@ -1,4 +1,4 @@
-package me.alphamode.wisp.loader.impl;
+package me.alphamode.wisp.loader.minecraft;
 
 import me.alphamode.wisp.loader.api.WispLoader;
 import me.alphamode.wisp.loader.api.ClassTransformer;
@@ -21,7 +21,7 @@ public class EntrypointClassTransformer implements ClassTransformer {
 
             ClassNode node = new ClassNode();
             reader.accept(node, 0);
-            MethodInsnNode hookNode = new MethodInsnNode(Opcodes.INVOKESTATIC, "me/alphamode/wisp/loader/impl/EntrypointHook", "launchMods", "()V");
+            MethodInsnNode hookNode = new MethodInsnNode(Opcodes.INVOKESTATIC, "me/alphamode/wisp/loader/minecraft/EntrypointHook", "launchMods", "()V");
             for (MethodNode methodNode : node.methods) {
                 if (methodNode.name.equals("bootStrap")) {
                     methodNode.instructions.forEach(abstractInsnNode -> {

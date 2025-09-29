@@ -1,5 +1,6 @@
 package me.alphamode.wisp.loader.impl;
 
+import me.alphamode.wisp.loader.LibraryFinder;
 import me.alphamode.wisp.loader.api.WispLoader;
 import me.alphamode.wisp.loader.api.components.ClasspathComponent;
 import me.alphamode.wisp.loader.api.components.TomlComponent;
@@ -50,7 +51,7 @@ public class ModDiscoverer implements ModLocator {
                     if (result.contains("plugin-id")) {
                         String modId = result.getString("plugin-id");
                         plugins.put(modId, result.getString("plugin"));
-                        PluginContext.CLASS_LOADER.addCodeSources(Path.of(url.getPath()));
+                        PluginContext.CLASS_LOADER.addCodeSources(LibraryFinder.getCodeSource(url, "wisp.mod.toml"));
                     }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -108,7 +109,7 @@ public class ModDiscoverer implements ModLocator {
                     if (result.contains("mod-id")) {
                         String modId = result.getString("mod-id");
                         var mod = new LoadingModImpl(result.getString("mod-id"), result.getString("version"))
-                                .addComponent(new ClasspathComponent(Path.of(url.getPath())))
+                                .addComponent(new ClasspathComponent(LibraryFinder.getCodeSource(url, "wisp.mod.toml")))
                                 .addComponent(new TomlComponent(result));
                         buildingModList.put(modId, mod);
                     }

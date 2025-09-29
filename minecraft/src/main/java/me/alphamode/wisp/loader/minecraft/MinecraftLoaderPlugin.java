@@ -6,7 +6,6 @@ import me.alphamode.wisp.loader.api.components.ClasspathComponent;
 import me.alphamode.wisp.loader.api.mod.Mod;
 import me.alphamode.wisp.loader.api.PluginContext;
 import me.alphamode.wisp.loader.api.WispLoader;
-import me.alphamode.wisp.loader.impl.EntrypointClassTransformer;
 import me.alphamode.wisp.loader.impl.InternalPlugin;
 
 import java.io.IOException;
