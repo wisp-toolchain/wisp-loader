@@ -3,7 +3,6 @@ package me.alphamode.wisp.loader.api;
 import me.alphamode.wisp.loader.api.mod.LoadingMod;
 import me.alphamode.wisp.loader.api.mod.Mod;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -27,15 +26,6 @@ public interface LoaderPlugin {
      * @param mods The current mod list
      */
     default void resolveMods(Map<String, List<LoadingMod>> mods) {}
-
-    /**
-     * Allows you to modify the games runtime classpath before the game launches.
-     * <p>
-     * Please note if your trying to change the game jar register a {@link GameLocator} in the {@link LoaderPlugin#init(PluginContext)} method using {@link PluginContext#registerGameLocator(GameLocator)}
-     * @param classPaths The current classpath; usually if unmodified result will be the same as System.getProperty("java.class.path").split(File.pathSeparator) minus the game jar.
-     */
-    @Deprecated
-    default void modifyClassPath(List<Path> classPaths) {}
 
     /**
      * Used to modify components of mods. At this point all mods declared and cannot be modified, if you wish to modify mods or add new mods please use {@link LoaderPlugin#resolveMods(Map)}

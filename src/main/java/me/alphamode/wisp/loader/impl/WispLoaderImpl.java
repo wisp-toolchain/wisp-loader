@@ -67,7 +67,6 @@ public class WispLoaderImpl implements WispLoader {
             plugin.init(context);
             extensions = context.getExtensions();
             plugin.resolveMods(context.getBuildingModList());
-            plugin.modifyClassPath(libs);
         });
 
         context.getBuildingModList().forEach((modId, mods) -> {

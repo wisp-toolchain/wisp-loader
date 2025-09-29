@@ -71,6 +71,12 @@ public class PluginContext {
         this.classPath = libs;
     }
 
+    /**
+     * Allows you to modify the games runtime classpath before the game launches.
+     * <p>
+     * Please note if your trying to change the game jar register a {@link GameLocator} in the {@link LoaderPlugin#init(PluginContext)} method using {@link PluginContext#registerGameLocator(GameLocator)}
+     * @return classPaths The current classpath; usually if unmodified result will be the same as System.getProperty("java.class.path").split(File.pathSeparator) minus the game jar.
+     */
     public List<Path> getClassPath() {
         return this.classPath;
     }

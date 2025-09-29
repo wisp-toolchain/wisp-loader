@@ -11,7 +11,6 @@ import me.alphamode.wisp.loader.impl.InternalPlugin;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.security.CodeSource;
-import java.util.List;
 import java.util.Map;
 
 public class MinecraftLoaderPlugin extends InternalPlugin {
@@ -26,19 +25,16 @@ public class MinecraftLoaderPlugin extends InternalPlugin {
         context.registerClassTransformer(new EntrypointClassTransformer());
         context.registerClassTransformer(new WispBrandingPatch());
 
+        CodeSource cs = WispClassLoader.class.getProtectionDomain().getCodeSource();
+        if (cs == null) return;
+
+        context.getClassPath().remove(LibraryFinder.asPath(cs.getLocation()));
+
 //        if (WispLoader.get().isDevelopment()) {
 //            context.getArgumentList().getArguments().remove("username");
 //            context.getArgumentList().replace("version", "wisp-dev");
 //            context.getArgumentList().replace("uuid", UUID.randomUUID().toString());
 //        }
-    }
-
-    @Override
-    public void modifyClassPath(List<Path> classPaths) {
-        CodeSource cs = WispClassLoader.class.getProtectionDomain().getCodeSource();
-        if (cs == null) return;
-
-        classPaths.remove(LibraryFinder.asPath(cs.getLocation()));
     }
 
     @Override
