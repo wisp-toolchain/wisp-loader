@@ -1,6 +1,7 @@
 package me.alphamode.wisp.loader.impl;
 
 import me.alphamode.wisp.loader.LibraryFinder;
+import me.alphamode.wisp.loader.WispClassLoader;
 import me.alphamode.wisp.loader.api.WispLoader;
 import me.alphamode.wisp.loader.api.components.ClasspathComponent;
 import me.alphamode.wisp.loader.api.components.TomlComponent;
@@ -11,6 +12,7 @@ import org.tomlj.Toml;
 import org.tomlj.TomlParseResult;
 
 import java.io.IOException;
+import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -42,16 +44,18 @@ public class ModDiscoverer implements ModLocator {
             }
         }
         try {
-            PluginContext.CLASS_LOADER.getResources("wisp.mod.toml").asIterator().forEachRemaining(url -> {
+            ModDiscoverer.class.getClassLoader().getResources("wisp.mod.toml").asIterator().forEachRemaining(url -> {
                 try {
                     URLConnection jarURLConnection = url.openConnection();
                     TomlParseResult result = Toml.parse(jarURLConnection.getInputStream());
                     result.errors().forEach(error -> System.err.println(error.toString()));
 
                     if (result.contains("plugin-id")) {
-                        String modId = result.getString("plugin-id");
-                        plugins.put(modId, result.getString("plugin"));
-                        PluginContext.CLASS_LOADER.addCodeSources(LibraryFinder.getCodeSource(url, "wisp.mod.toml"));
+                        String pluginId = result.getString("plugin-id");
+                        String plugin = result.getString("plugin");
+                        plugins.put(pluginId, plugin);
+//                        PluginContext.CLASS_LOADER.addCodeSources(LibraryFinder.getCodeSource(Class.forName(plugin, false, ModDiscoverer.class.getClassLoader())));
+//                        PluginContext.CLASS_LOADER.addCodeSources(LibraryFinder.getCodeSource(url, "wisp.mod.toml"));
                     }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
