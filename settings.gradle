@@ -12,6 +12,7 @@ pluginManagement {
 
 rootProject.name = 'wisp-loader'
 
+include("default-plugin")
 include("mixin")
 include("mixin-extras")
 include("minecraft")

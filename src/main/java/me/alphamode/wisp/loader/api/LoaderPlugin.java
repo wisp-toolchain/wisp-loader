@@ -26,7 +26,7 @@ public interface LoaderPlugin {
      * You cannot remove any mod that provides a loader plugin.
      * @param mods The current mod list
      */
-    default void modifyMods(Map<String, LoadingMod> mods) {}
+    default void resolveMods(Map<String, List<LoadingMod>> mods) {}
 
     /**
      * Allows you to modify the games runtime classpath before the game launches.
@@ -38,7 +38,7 @@ public interface LoaderPlugin {
     default void modifyClassPath(List<Path> classPaths) {}
 
     /**
-     * Used to modify components of mods. At this point all mods declared and cannot be modified, if you wish to modify mods or add new mods please use {@link LoaderPlugin#modifyMods(Map)}
+     * Used to modify components of mods. At this point all mods declared and cannot be modified, if you wish to modify mods or add new mods please use {@link LoaderPlugin#resolveMods(Map)}
      * @param mods
      */
     default void onModsFinalized(Map<String, LoadingMod> mods) {}

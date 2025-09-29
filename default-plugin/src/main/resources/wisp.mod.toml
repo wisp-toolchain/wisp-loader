@@ -1,0 +1,3 @@
+plugin-id="default-plugin"
+plugin="me.alphamode.wisp.loader.default_plugin.DefaultLoaderPlugin"
+version="1.0.0"

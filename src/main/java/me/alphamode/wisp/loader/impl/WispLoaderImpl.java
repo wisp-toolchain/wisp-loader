@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 
 public class WispLoaderImpl implements WispLoader {
     public static final WispLoaderImpl INSTANCE = new WispLoaderImpl();
-    private final ModDiscoverer discoverer = new ModDiscoverer();
+    private final PluginLocator discoverer = new PluginLocator();
     private final SortedMap<String, LoaderPlugin> plugins = new TreeMap<>();
     private final SortedMap<String, LoadingMod> buildingModList = new TreeMap<>();
     private Map<String, ? extends Extension> extensions;
@@ -33,8 +33,6 @@ public class WispLoaderImpl implements WispLoader {
     private GameLocator locator;
 
     public List<Path> load(ArgumentList argumentList) {
-        discoverer.locateMods(buildingModList);
-
         discoverer.locatePlugins().forEach((id, plugin) -> {
             try {
                 plugins.put(id, (LoaderPlugin) PluginContext.CLASS_LOADER.loadClass(plugin).getDeclaredConstructor().newInstance());
@@ -68,8 +66,17 @@ public class WispLoaderImpl implements WispLoader {
         plugins.forEach((modId, plugin) -> {
             plugin.init(context);
             extensions = context.getExtensions();
-            plugin.modifyMods(buildingModList);
+            plugin.resolveMods(context.getBuildingModList());
             plugin.modifyClassPath(libs);
+        });
+
+        context.getBuildingModList().forEach((modId, mods) -> {
+            if (mods.isEmpty())
+                return;
+            if (mods.size() > 1) {
+                throw new ModResolveException(String.format("Multiple Mods found for %s in %s", modId, mods));
+            }
+            buildingModList.put(modId, mods.get(0));
         });
 
         locator = context.getLocator();

@@ -37,10 +37,11 @@ public class MixinLoaderPlugin extends InternalPlugin {
         }
 
 //        context.registerExtension(SERVICE_EXTENSION, (WispMixinService) WispMixinService.getTransformer());
+
     }
 
     @Override
-    public void modifyMods(Map<String, LoadingMod> mods) {
+    public void onModsFinalized(Map<String, LoadingMod> mods) {
         for (LoadingMod mod : mods.values()) {
             TomlComponent toml = mod.getComponent(TomlComponent.class);
             if (toml != null && toml.toml().contains("mixins")) {

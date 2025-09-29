@@ -3,7 +3,7 @@ package me.alphamode.wisp.loader.api;
 import me.alphamode.wisp.loader.WispClassLoader;
 import me.alphamode.wisp.loader.api.extension.Extension;
 import me.alphamode.wisp.loader.api.extension.ExtensionType;
-import me.alphamode.wisp.loader.api.mod.Mod;
+import me.alphamode.wisp.loader.api.mod.LoadingMod;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ public class PluginContext {
     public static final WispClassLoader CLASS_LOADER = new WispClassLoader();
     private GameLocator locator;
     private final List<ClassTransformer> transformers = new ArrayList<>();
-    private final Map<String, Mod> buildingModList = new HashMap<>();
+    private final Map<String, List<LoadingMod>> buildingModList = new HashMap<>();
     private final Map<String, Extension> extensions = new HashMap<>();
     private List<Path> classPath;
     private final ArgumentList argumentList;
@@ -39,6 +39,20 @@ public class PluginContext {
 
     public GameLocator getLocator() {
         return this.locator;
+    }
+
+    public void addMod(LoadingMod mod) {
+        addMods(mod);
+    }
+
+    public void addMods(LoadingMod... mods) {
+        for (LoadingMod mod : mods) {
+            buildingModList.computeIfAbsent(mod.getId(), id -> new ArrayList<>()).add(mod);
+        }
+    }
+
+    public Map<String, List<LoadingMod>> getBuildingModList() {
+        return buildingModList;
     }
 
     public void registerClassTransformer(ClassTransformer transformer) {
