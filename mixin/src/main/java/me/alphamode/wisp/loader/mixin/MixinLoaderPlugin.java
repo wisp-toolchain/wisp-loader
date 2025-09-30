@@ -41,7 +41,7 @@ public class MixinLoaderPlugin extends InternalPlugin {
     }
 
     @Override
-    public void onModsFinalized(Map<String, LoadingMod> mods) {
+    public void onLoadingFinalized(Map<String, LoadingMod> mods) {
         for (LoadingMod mod : mods.values()) {
             TomlComponent toml = mod.getComponent(TomlComponent.class);
             if (toml != null && toml.toml().contains("mixins")) {
@@ -52,7 +52,7 @@ public class MixinLoaderPlugin extends InternalPlugin {
     }
 
     @Override
-    public void onFinish(Map<String, Mod> mods) {
+    public void onModsFinalized(Map<String, Mod> mods) {
         for (Mod mod : mods.values()) {
             if (mod.hasComponent(MixinComponent.class)) {
                 String[] mixins = mod.getComponent(MixinComponent.class).configs();

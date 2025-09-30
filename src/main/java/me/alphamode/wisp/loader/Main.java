@@ -45,7 +45,7 @@ public class Main {
         });
 
         loader.getPlugins().forEach((s, loaderPlugin) -> {
-            loaderPlugin.onFinish(loader.getMods());
+            loaderPlugin.onModsFinalized(loader.getMods());
         });
 
         classLoader.validParentCodeSources.add(LibraryFinder.getCodeSource(WispLoader.class));

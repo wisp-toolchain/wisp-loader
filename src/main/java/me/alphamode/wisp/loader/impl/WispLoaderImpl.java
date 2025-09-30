@@ -49,6 +49,8 @@ public class WispLoaderImpl implements WispLoader {
             WispLoader.LOGGER.info("   " + modId);
         });
 
+        // TODO: remove internal plugin and introduce a priority system
+
         plugins.forEach((modId, plugin) -> {
             if (plugin instanceof InternalPlugin)
                 plugin.preInit(context);
@@ -66,6 +68,11 @@ public class WispLoaderImpl implements WispLoader {
         plugins.forEach((modId, plugin) -> {
             plugin.init(context);
             extensions = context.getExtensions();
+        });
+
+        LOGGER.debug("Resolving mods");
+
+        plugins.forEach((modId, plugin) -> {
             plugin.resolveMods(context.getBuildingModList());
         });
 
@@ -85,7 +92,7 @@ public class WispLoaderImpl implements WispLoader {
 
         Map<String, LoadingMod> finalModList = Map.copyOf(buildingModList);
         plugins.forEach((modId, plugin) -> {
-            plugin.onModsFinalized(finalModList);
+            plugin.onLoadingFinalized(finalModList);
         });
         Map<String, Mod> tempMods = new TreeMap<>();
         buildingModList.forEach((id, mod) -> tempMods.put(id, mod.toMod()));

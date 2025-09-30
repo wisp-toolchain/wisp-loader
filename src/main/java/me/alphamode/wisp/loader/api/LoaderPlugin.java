@@ -22,20 +22,20 @@ public interface LoaderPlugin {
 
     /**
      * Allows you to modify the loading mod list.
-     * You cannot remove any mod that provides a loader plugin.
-     * @param mods The current mod list
+     * Used for dependency resolution and SAT solving.
+     * @param mods The current loading mod candidate list
      */
     default void resolveMods(Map<String, List<LoadingMod>> mods) {}
 
     /**
-     * Used to modify components of mods. At this point all mods declared and cannot be modified, if you wish to modify mods or add new mods please use {@link LoaderPlugin#resolveMods(Map)}
-     * @param mods
+     * Used to modify components of mods. At this point all mods are declared and cannot be modified, if you wish to modify mods or add new mods please use {@link LoaderPlugin#resolveMods(Map)}
+     * @param mods An immutable copy of the loading mod list, this is mainly used to add new components to mods before they are converted to {@link Mod}'s.
      */
-    default void onModsFinalized(Map<String, LoadingMod> mods) {}
+    default void onLoadingFinalized(Map<String, LoadingMod> mods) {}
 
     /**
-     * Used for 
-     * @param mods
+     * Most commonly used to do any component handling on mods, such as taking a mixin component and registering it to mixin
+     * @param mods An immutable copy of all loaded mods.
      */
-    default void onFinish(Map<String, Mod> mods) {}
+    default void onModsFinalized(Map<String, Mod> mods) {}
 }
