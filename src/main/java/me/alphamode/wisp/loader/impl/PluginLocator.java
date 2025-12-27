@@ -1,9 +1,10 @@
 package me.alphamode.wisp.loader.impl;
 
+import io.github.wasabithumb.jtoml.JToml;
+import io.github.wasabithumb.jtoml.document.TomlDocument;
+import me.alphamode.wisp.loader.LibraryFinder;
 import me.alphamode.wisp.loader.api.PluginContext;
 import me.alphamode.wisp.loader.api.mod.ModLocator;
-import org.tomlj.Toml;
-import org.tomlj.TomlParseResult;
 
 import java.io.IOException;
 import java.net.URLConnection;
@@ -18,16 +19,16 @@ import java.util.stream.Stream;
 
 public class PluginLocator implements ModLocator {
     public Map<String, String> locatePlugins() {
+        JToml toml = JToml.jToml();
         Map<String, String> plugins = new HashMap<>();
         for (Path path : locateMods()) {
             try (FileSystem mod = FileSystems.newFileSystem(path)) {
                 var modFile = mod.getPath("wisp.mod.toml");
                 if (Files.exists(modFile)) {
-                    TomlParseResult result = Toml.parse(modFile);
-                    result.errors().forEach(error -> System.err.println(error.toString()));
-                    String modId = result.getString("plugin-id");
+                    TomlDocument result = toml.read(modFile);
                     if (result.contains("plugin-id")) {
-                        plugins.put(modId, result.getString("plugin"));
+                        String modId = result.get("plugin-id").asPrimitive().asString();
+                        plugins.put(modId, result.get("plugin").asPrimitive().asString());
                         PluginContext.CLASS_LOADER.addCodeSources(path);
                     }
                 }
@@ -39,17 +40,16 @@ public class PluginLocator implements ModLocator {
             PluginLocator.class.getClassLoader().getResources("wisp.mod.toml").asIterator().forEachRemaining(url -> {
                 try {
                     URLConnection jarURLConnection = url.openConnection();
-                    TomlParseResult result = Toml.parse(jarURLConnection.getInputStream());
-                    result.errors().forEach(error -> System.err.println(error.toString()));
+                    TomlDocument result = toml.read(jarURLConnection.getInputStream());
 
                     if (result.contains("plugin-id")) {
-                        String pluginId = result.getString("plugin-id");
-                        String plugin = result.getString("plugin");
+                        String pluginId = result.get("plugin-id").asPrimitive().asString();
+                        String plugin = result.get("plugin").asPrimitive().asString();
                         plugins.put(pluginId, plugin);
-//                        PluginContext.CLASS_LOADER.addCodeSources(LibraryFinder.getCodeSource(Class.forName(plugin, false, ModDiscoverer.class.getClassLoader())));
+                        PluginContext.CLASS_LOADER.addCodeSources(LibraryFinder.getCodeSource(Class.forName(plugin, false, PluginLocator.class.getClassLoader())));
 //                        PluginContext.CLASS_LOADER.addCodeSources(LibraryFinder.getCodeSource(url, "wisp.mod.toml"));
                     }
-                } catch (IOException e) {
+                } catch (IOException | ClassNotFoundException e) {
                     throw new RuntimeException(e);
                 }
             });

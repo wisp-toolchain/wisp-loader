@@ -1,6 +1,6 @@
 package me.alphamode.wisp.loader.api.components;
 
-import org.tomlj.TomlParseResult;
+import io.github.wasabithumb.jtoml.document.TomlDocument;
 
-public record TomlComponent(TomlParseResult toml) {
+public record TomlComponent(TomlDocument toml) {
 }

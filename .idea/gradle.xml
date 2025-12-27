@@ -5,14 +5,14 @@
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="gradleJvm" value="temurin-21" />
+        <option name="gradleJvm" value="temurin-25" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/default-plugin" />
-            <option value="$PROJECT_DIR$/minecraft" />
-            <option value="$PROJECT_DIR$/mixin" />
-            <option value="$PROJECT_DIR$/mixin-extras" />
+            <option value="$PROJECT_DIR$/modules/default-plugin" />
+            <option value="$PROJECT_DIR$/modules/minecraft" />
+            <option value="$PROJECT_DIR$/modules/mixin" />
+            <option value="$PROJECT_DIR$/modules/mixin-extras" />
           </set>
         </option>
         <option name="resolveExternalAnnotations" value="true" />

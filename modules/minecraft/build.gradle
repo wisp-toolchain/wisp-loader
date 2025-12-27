@@ -1,0 +1,54 @@
+plugins {
+    id 'net.fabricmc.fabric-loom' version '1.14-SNAPSHOT'
+    id 'maven-publish'
+}
+
+group = "me.alphamode.wisp.minecraft"
+version = "1.5"
+
+repositories {
+    maven {
+        url "https://mvn.devos.one/snapshots"
+    }
+}
+
+dependencies {
+    minecraft("com.mojang:minecraft:26.1-snapshot-1")
+    implementation project(":")
+    implementation project(":default-plugin")
+
+    api("me.alphamode.wisp:wisp-env:1.0")
+    api("org.ow2.asm:asm:9.9.1")
+    api("org.ow2.asm:asm-tree:9.9.1")
+
+//    implementation 'com.google.code.gson:gson:2.10.1'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+java {
+    withSourcesJar()
+}
+
+def ENV = System.getenv()
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            // add all the jars that should be included when publishing to maven
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            url ENV.MAVEN_URL
+            credentials {
+                username ENV.MAVEN_USER
+                password ENV.MAVEN_PASSWORD
+            }
+        }
+    }
+}
