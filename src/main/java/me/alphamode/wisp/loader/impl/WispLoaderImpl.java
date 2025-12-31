@@ -5,6 +5,10 @@ import me.alphamode.wisp.loader.api.extension.Extension;
 import me.alphamode.wisp.loader.api.extension.ExtensionType;
 import me.alphamode.wisp.loader.api.mod.LoadingMod;
 import me.alphamode.wisp.loader.api.mod.Mod;
+import me.alphamode.wisp.loader.api.plugin.ClassTransformer;
+import me.alphamode.wisp.loader.api.plugin.GameLocator;
+import me.alphamode.wisp.loader.api.plugin.LoaderPlugin;
+import me.alphamode.wisp.loader.api.plugin.PluginContext;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;

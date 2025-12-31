@@ -1,8 +1,6 @@
 package me.alphamode.wisp.loader;
 
-import me.alphamode.wisp.loader.api.ClassTransformer;
-import me.alphamode.wisp.loader.api.components.ClasspathComponent;
-import me.alphamode.wisp.loader.api.mod.Mod;
+import me.alphamode.wisp.loader.api.plugin.ClassTransformer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

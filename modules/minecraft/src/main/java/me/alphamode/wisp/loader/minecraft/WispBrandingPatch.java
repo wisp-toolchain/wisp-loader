@@ -1,7 +1,7 @@
 package me.alphamode.wisp.loader.minecraft;
 
 import me.alphamode.wisp.loader.api.WispLoader;
-import me.alphamode.wisp.loader.api.ClassTransformer;
+import me.alphamode.wisp.loader.api.plugin.ClassTransformer;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.AbstractInsnNode;

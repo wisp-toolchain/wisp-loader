@@ -1,4 +1,4 @@
-package me.alphamode.wisp.loader.api;
+package me.alphamode.wisp.loader.api.plugin;
 
 import me.alphamode.wisp.loader.api.mod.LoadingMod;
 import me.alphamode.wisp.loader.api.mod.Mod;
@@ -28,7 +28,7 @@ public interface LoaderPlugin {
     default void resolveMods(Map<String, List<LoadingMod>> mods) {}
 
     /**
-     * Used to modify components of mods. At this point all mods are declared and cannot be modified, if you wish to modify mods or add new mods please use {@link LoaderPlugin#resolveMods(Map)}
+     * Used to modify components of mods. At this point all mods are declared and cannot be modified, if you wish to modify mods or add new mods please use {@link PluginContext#getBuildingModList()} in {@link LoaderPlugin#init(PluginContext)}
      * @param mods An immutable copy of the loading mod list, this is mainly used to add new components to mods before they are converted to {@link Mod}'s.
      */
     default void onLoadingFinalized(Map<String, LoadingMod> mods) {}

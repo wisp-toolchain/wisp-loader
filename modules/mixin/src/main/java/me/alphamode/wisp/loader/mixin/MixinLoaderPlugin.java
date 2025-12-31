@@ -1,7 +1,7 @@
 package me.alphamode.wisp.loader.mixin;
 
 import me.alphamode.wisp.loader.api.mod.Mod;
-import me.alphamode.wisp.loader.api.PluginContext;
+import me.alphamode.wisp.loader.api.plugin.PluginContext;
 import me.alphamode.wisp.loader.mixin.components.MixinComponent;
 import me.alphamode.wisp.loader.impl.InternalPlugin;
 import org.spongepowered.asm.launch.MixinBootstrap;

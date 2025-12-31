@@ -1,4 +1,6 @@
-package me.alphamode.wisp.loader.api;
+package me.alphamode.wisp.loader.api.plugin;
+
+import me.alphamode.wisp.loader.api.ArgumentList;
 
 import java.nio.file.Path;
 import java.util.List;

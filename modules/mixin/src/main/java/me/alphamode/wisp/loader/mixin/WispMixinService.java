@@ -2,7 +2,7 @@ package me.alphamode.wisp.loader.mixin;
 
 import me.alphamode.wisp.loader.LibraryFinder;
 import me.alphamode.wisp.loader.api.WispLoader;
-import me.alphamode.wisp.loader.api.PluginContext;
+import me.alphamode.wisp.loader.api.plugin.PluginContext;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.launch.platform.container.ContainerHandleURI;
@@ -141,7 +141,7 @@ public class WispMixinService implements IMixinService, IClassProvider, IClassBy
 
     @Override
     public MixinEnvironment.CompatibilityLevel getMaxCompatibilityLevel() {
-        return MixinEnvironment.CompatibilityLevel.JAVA_18;
+        return MixinEnvironment.CompatibilityLevel.JAVA_25;
     }
 
     @Override

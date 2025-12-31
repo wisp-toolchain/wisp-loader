@@ -4,7 +4,7 @@ import me.alphamode.wisp.loader.LibraryFinder;
 import me.alphamode.wisp.loader.WispClassLoader;
 import me.alphamode.wisp.loader.api.components.ClasspathComponent;
 import me.alphamode.wisp.loader.api.mod.Mod;
-import me.alphamode.wisp.loader.api.PluginContext;
+import me.alphamode.wisp.loader.api.plugin.PluginContext;
 import me.alphamode.wisp.loader.api.WispLoader;
 import me.alphamode.wisp.loader.impl.InternalPlugin;
 

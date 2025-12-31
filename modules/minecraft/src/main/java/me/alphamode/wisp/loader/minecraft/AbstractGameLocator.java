@@ -1,8 +1,8 @@
 package me.alphamode.wisp.loader.minecraft;
 
 import me.alphamode.wisp.loader.api.ArgumentList;
-import me.alphamode.wisp.loader.api.GameLocator;
-import me.alphamode.wisp.loader.api.PluginContext;
+import me.alphamode.wisp.loader.api.plugin.GameLocator;
+import me.alphamode.wisp.loader.api.plugin.PluginContext;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;

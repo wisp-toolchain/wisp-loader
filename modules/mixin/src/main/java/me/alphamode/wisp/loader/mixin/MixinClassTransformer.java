@@ -1,6 +1,6 @@
 package me.alphamode.wisp.loader.mixin;
 
-import me.alphamode.wisp.loader.api.ClassTransformer;
+import me.alphamode.wisp.loader.api.plugin.ClassTransformer;
 
 public class MixinClassTransformer implements ClassTransformer {
     @Override

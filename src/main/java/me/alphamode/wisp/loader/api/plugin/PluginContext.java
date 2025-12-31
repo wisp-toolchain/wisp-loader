@@ -1,6 +1,7 @@
-package me.alphamode.wisp.loader.api;
+package me.alphamode.wisp.loader.api.plugin;
 
 import me.alphamode.wisp.loader.WispClassLoader;
+import me.alphamode.wisp.loader.api.ArgumentList;
 import me.alphamode.wisp.loader.api.extension.Extension;
 import me.alphamode.wisp.loader.api.extension.ExtensionType;
 import me.alphamode.wisp.loader.api.mod.LoadingMod;

@@ -3,7 +3,7 @@ package me.alphamode.wisp.loader.impl;
 import io.github.wasabithumb.jtoml.JToml;
 import io.github.wasabithumb.jtoml.document.TomlDocument;
 import me.alphamode.wisp.loader.LibraryFinder;
-import me.alphamode.wisp.loader.api.PluginContext;
+import me.alphamode.wisp.loader.api.plugin.PluginContext;
 import me.alphamode.wisp.loader.api.mod.ModLocator;
 
 import java.io.IOException;

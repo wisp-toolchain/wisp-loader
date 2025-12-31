@@ -1,8 +1,8 @@
 package me.alphamode.wisp.loader;
 
 import me.alphamode.wisp.loader.api.ArgumentList;
-import me.alphamode.wisp.loader.api.GameLocator;
-import me.alphamode.wisp.loader.api.PluginContext;
+import me.alphamode.wisp.loader.api.plugin.GameLocator;
+import me.alphamode.wisp.loader.api.plugin.PluginContext;
 import me.alphamode.wisp.loader.api.WispLoader;
 import me.alphamode.wisp.loader.impl.WispLoaderImpl;
 
@@ -16,7 +16,7 @@ import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 
 public class Main {
-    public static void main(String[] args) {
+    static void main(String[] args) {
         WispLoader.LOGGER.info("Yooo its wisp loader");
         WispClassLoader classLoader = PluginContext.CLASS_LOADER;
 

@@ -1,6 +1,6 @@
 package me.alphamode.wisp.loader.default_plugin;
 
-import me.alphamode.wisp.loader.api.PluginContext;
+import me.alphamode.wisp.loader.api.plugin.PluginContext;
 import me.alphamode.wisp.loader.api.mod.LoadingMod;
 import me.alphamode.wisp.loader.default_plugin.locator.DefaultModLocator;
 import me.alphamode.wisp.loader.impl.InternalPlugin;

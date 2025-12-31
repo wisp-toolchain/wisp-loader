@@ -14,15 +14,6 @@ allprojects {
 
     repositories {
         mavenCentral()
-        maven {
-            url = "https://libraries.minecraft.net"
-        }
-        maven {
-            url = "https://maven.fabricmc.net/"
-        }
-        maven {
-            url = 'https://plugins.gradle.org/m2/'
-        }
     }
 }
 
