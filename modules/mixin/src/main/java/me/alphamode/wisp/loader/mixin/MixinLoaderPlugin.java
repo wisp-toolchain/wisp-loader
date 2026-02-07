@@ -21,7 +21,7 @@ public class MixinLoaderPlugin extends InternalPlugin {
 
         context.registerClassTransformer(new MixinClassTransformer());
 
-        MixinEnvironment.CompatibilityLevel.MAX_SUPPORTED = MixinEnvironment.CompatibilityLevel.JAVA_18;
+        MixinEnvironment.CompatibilityLevel.MAX_SUPPORTED = MixinEnvironment.CompatibilityLevel.JAVA_25;
 
         MixinBootstrap.init();
         try {

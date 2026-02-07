@@ -25,10 +25,10 @@ public class MinecraftLoaderPlugin extends InternalPlugin {
         context.registerClassTransformer(new EntrypointClassTransformer());
         context.registerClassTransformer(new WispBrandingPatch());
 
-        CodeSource cs = WispClassLoader.class.getProtectionDomain().getCodeSource();
-        if (cs == null) return;
+//        CodeSource cs = WispClassLoader.class.getProtectionDomain().getCodeSource();
+//        if (cs == null) return;
 
-        context.getClassPath().remove(LibraryFinder.asPath(cs.getLocation()));
+//        context.getClassPath().remove(LibraryFinder.asPath(cs.getLocation()));
 
 //        if (WispLoader.get().isDevelopment()) {
 //            context.getArgumentList().getArguments().remove("username");

@@ -1,22 +1,20 @@
 package me.alphamode.wisp.loader;
 
 import me.alphamode.wisp.loader.api.ArgumentList;
-import me.alphamode.wisp.loader.api.plugin.GameLocator;
+import me.alphamode.wisp.loader.api.plugin.Provider;
 import me.alphamode.wisp.loader.api.plugin.PluginContext;
 import me.alphamode.wisp.loader.api.WispLoader;
 import me.alphamode.wisp.loader.impl.WispLoaderImpl;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 
 public class Main {
-    static void main(String[] args) {
+    public static void main(String[] args) {
         WispLoader.LOGGER.info("Yooo its wisp loader");
         WispClassLoader classLoader = PluginContext.CLASS_LOADER;
 
@@ -28,15 +26,9 @@ public class Main {
 
         var gameLibs = loader.load(argumentList);
 
-        GameLocator locator = loader.getLocator();
+        Provider locator = loader.getLocator();
 
-        classLoader.addUrls(gameLibs.stream().map(path -> {
-            try {
-                return path.toUri().toURL();
-            } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
-            }
-        }).toArray(URL[]::new));
+
 
         WispLoader.LOGGER.info("Loading mods {}", loader.getMods().size());
 

@@ -1,5 +1,8 @@
 package me.alphamode.wisp.loader.minecraft;
 
+import me.alphamode.wisp.loader.LibraryFinder;
+import me.alphamode.wisp.loader.WispClassLoader;
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -12,7 +15,7 @@ public class ClientGameLocator extends AbstractGameLocator {
 //    private static final Gson GSON = new Gson();
 
     @Override
-    public Path locateGame(List<Path> classPaths, String[] args) {
+    public Path provide(List<Path> classPaths, String[] args) {
         Path foundGame = null;
         for (Path gameLib : classPaths) {
             if ((gameLib.toString().contains("client-mapped-") && gameLib.toString().endsWith(".jar")) || gameLib.toString().endsWith("merged.jar")) {
@@ -61,7 +64,7 @@ public class ClientGameLocator extends AbstractGameLocator {
     }
 
     @Override
-    public List<Path> getGameClassPaths(String[] args) {
+    public List<Path> getClassPaths(String[] args) {
         var gameLibsPaths = System.getProperty("java.class.path").split(File.pathSeparator);
         ArrayList<Path> gameLibs = new ArrayList<>();
 
@@ -69,9 +72,11 @@ public class ClientGameLocator extends AbstractGameLocator {
             gameLibs.add(Path.of(gameLib));
         }
 
-        var game = locateGame(gameLibs, args);
+        var game = provide(gameLibs, args);
         if (game != null)
             gameLibs.add(game);
+
+        gameLibs.remove(LibraryFinder.getCodeSource(WispClassLoader.class));
 
         return gameLibs;
     }

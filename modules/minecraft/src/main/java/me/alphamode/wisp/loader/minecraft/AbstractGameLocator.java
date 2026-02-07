@@ -1,13 +1,13 @@
 package me.alphamode.wisp.loader.minecraft;
 
 import me.alphamode.wisp.loader.api.ArgumentList;
-import me.alphamode.wisp.loader.api.plugin.GameLocator;
+import me.alphamode.wisp.loader.api.plugin.Provider;
 import me.alphamode.wisp.loader.api.plugin.PluginContext;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
-public abstract class AbstractGameLocator implements GameLocator {
+public abstract class AbstractGameLocator implements Provider {
 
     @Override
     public void launch(ArgumentList arguments) {

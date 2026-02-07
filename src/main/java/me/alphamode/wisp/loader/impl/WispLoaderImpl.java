@@ -1,17 +1,21 @@
 package me.alphamode.wisp.loader.impl;
 
+import io.github.wasabithumb.jtoml.document.TomlDocument;
+import me.alphamode.wisp.loader.LibraryFinder;
 import me.alphamode.wisp.loader.api.*;
 import me.alphamode.wisp.loader.api.extension.Extension;
 import me.alphamode.wisp.loader.api.extension.ExtensionType;
 import me.alphamode.wisp.loader.api.mod.LoadingMod;
 import me.alphamode.wisp.loader.api.mod.Mod;
 import me.alphamode.wisp.loader.api.plugin.ClassTransformer;
-import me.alphamode.wisp.loader.api.plugin.GameLocator;
+import me.alphamode.wisp.loader.api.plugin.Provider;
 import me.alphamode.wisp.loader.api.plugin.LoaderPlugin;
 import me.alphamode.wisp.loader.api.plugin.PluginContext;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -23,7 +27,7 @@ public class WispLoaderImpl implements WispLoader {
     private final SortedMap<String, LoadingMod> buildingModList = new TreeMap<>();
     private Map<String, ? extends Extension> extensions;
     private Map<String, Mod> mods;
-    private GameLocator locator;
+    private Provider locator;
 
     public List<Path> load(ArgumentList argumentList) {
         discoverer.locatePlugins().forEach((id, plugin) -> {
@@ -55,13 +59,26 @@ public class WispLoaderImpl implements WispLoader {
             plugin.preInit(context);
         });
 
-        List<Path> libs = context.getLocator().getGameClassPaths(argumentList.toArray());
+        PluginContext.CLASS_LOADER.validParentCodeSources.add(LibraryFinder.getCodeSource(TomlDocument.class));
+
+        List<Path> libs = context.getLocator().getClassPaths(argumentList.toArray());
         context.setClassPath(libs);
+
+        PluginContext.CLASS_LOADER.addUrls(context.getClassPath().stream().map(path -> {
+            try {
+                return path.toUri().toURL();
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
+        }).toArray(URL[]::new));
+
 
         plugins.forEach((modId, plugin) -> {
             plugin.init(context);
             extensions = context.getExtensions();
         });
+
+
 
         LOGGER.debug("Resolving mods");
 
@@ -94,7 +111,7 @@ public class WispLoaderImpl implements WispLoader {
         return context.getClassPath();
     }
 
-    public GameLocator getLocator() {
+    public Provider getLocator() {
         return locator;
     }
 
@@ -104,7 +121,7 @@ public class WispLoaderImpl implements WispLoader {
     }
 
     @Override
-    public Path getGameDir() {
+    public Path getRunDir() {
         return Path.of("run");
     }
 

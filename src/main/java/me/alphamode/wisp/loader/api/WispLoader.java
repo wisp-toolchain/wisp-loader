@@ -25,7 +25,7 @@ public interface WispLoader {
 
     boolean isServer();
 
-    Path getGameDir();
+    Path getRunDir();
 
     Map<String, Mod> getMods();
 

@@ -10,7 +10,6 @@ import java.lang.reflect.InvocationTargetException;
 
 public class EntrypointHook {
     public static void launchMods() {
-        Minecart
         WispLoader.get().getMods().forEach((modId, mod) -> {
             if (mod.hasComponent(TomlComponent.class)) {
                 TomlDocument modToml = mod.getComponent(TomlComponent.class).toml();

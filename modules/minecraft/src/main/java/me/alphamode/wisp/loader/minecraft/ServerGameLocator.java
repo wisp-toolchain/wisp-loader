@@ -7,12 +7,12 @@ import java.util.List;
 // Game locator for minecraft's bundler system
 public class ServerGameLocator extends AbstractGameLocator {
     @Override
-    public Path locateGame(List<Path> classPaths, String[] args) {
+    public Path provide(List<Path> classPaths, String[] args) {
         return null;
     }
 
     @Override
-    public List<Path> getGameClassPaths(String[] args) {
+    public List<Path> getClassPaths(String[] args) {
         return new ArrayList<>(); // 
     }
 

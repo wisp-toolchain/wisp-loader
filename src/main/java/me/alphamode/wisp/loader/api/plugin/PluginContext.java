@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class PluginContext {
     public static final WispClassLoader CLASS_LOADER = new WispClassLoader();
-    private GameLocator locator;
+    private Provider locator;
     private final List<ClassTransformer> transformers = new ArrayList<>();
     private final Map<String, List<LoadingMod>> buildingModList = new HashMap<>();
     private final Map<String, Extension> extensions = new HashMap<>();
@@ -31,14 +31,14 @@ public class PluginContext {
      * This is used to provide a custom game jar, such as a patched version of minecraft.
      * Only one of these can exist. Registering one will override the default game locator.
      */
-    public void registerGameLocator(GameLocator locator) {
+    public void registerGameLocator(Provider locator) {
         if (this.locator == null)
             this.locator = locator;
         else
             throw new RuntimeException(String.format("Only one game locator can be registered! %s %s", locator, this.locator));
     }
 
-    public GameLocator getLocator() {
+    public Provider getLocator() {
         return this.locator;
     }
 
@@ -75,7 +75,7 @@ public class PluginContext {
     /**
      * Allows you to modify the games runtime classpath before the game launches.
      * <p>
-     * Please note if your trying to change the game jar register a {@link GameLocator} in the {@link LoaderPlugin#init(PluginContext)} method using {@link PluginContext#registerGameLocator(GameLocator)}
+     * Please note if your trying to change the game jar register a {@link Provider} in the {@link LoaderPlugin#preInit(PluginContext)} method using {@link PluginContext#registerGameLocator(Provider)}
      * @return classPaths The current classpath; usually if unmodified result will be the same as System.getProperty("java.class.path").split(File.pathSeparator) minus the game jar.
      */
     public List<Path> getClassPath() {

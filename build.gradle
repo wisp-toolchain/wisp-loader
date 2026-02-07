@@ -2,11 +2,16 @@ plugins {
     id 'java'
     id 'java-library'
     id 'maven-publish'
-    id 'com.gradleup.shadow' version '9.3.0'
+//    id 'com.gradleup.shadow' version '9.3.0'
 }
 
+
 group = 'me.alphamode.wisp'
-version = '0.1.14'
+version = '0.1.17'
+
+base {
+    archivesName = project.name
+}
 
 allprojects {
     apply plugin: 'java'
@@ -17,11 +22,6 @@ allprojects {
     }
 }
 
-configurations {
-    shadowedDeps
-    shadowedDeps.extendsFrom api
-}
-
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
@@ -29,7 +29,6 @@ dependencies {
     api 'io.github.wasabithumb:jtoml:1.4.1'
 
     api 'org.slf4j:slf4j-api:2.0.17:'
-    api 'org.slf4j:slf4j-jdk14:2.0.17'
     api 'org.jetbrains:annotations:24.1.0'
 }
 
@@ -41,16 +40,16 @@ java {
     withSourcesJar()
 }
 
-tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
-    minimize()
-    relocate 'org.slf4j', 'me.alphamode.wisp.loader.api.slf4j'
-    relocate 'org.tomlj', "me.alphamode.wisp.loader.impl.tomlj"
-    relocate 'io.github.wasabithumb.jtoml', 'me.alphamode.wisp.loader.impl.jtoml'
-    dependencies {
-        exclude(dependency("org.jetbrains:annotations:24.1.0"))
-        exclude(dependency("org.ow2.sat4j:.*"))
-    }
-}
+//tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+//    minimize()
+//    relocate 'org.slf4j', 'me.alphamode.wisp.loader.api.slf4j'
+//    relocate 'org.tomlj', "me.alphamode.wisp.loader.impl.tomlj"
+//    relocate 'io.github.wasabithumb.jtoml', 'me.alphamode.wisp.loader.impl.jtoml'
+//    dependencies {
+//        exclude(dependency("org.jetbrains:annotations:24.1.0"))
+//        exclude(dependency("org.ow2.sat4j:.*"))
+//    }
+//}
 
 sourcesJar {
     from sourceSets.main.allSource
@@ -78,6 +77,7 @@ def ENV = System.getenv()
 publishing {
     publications {
         mavenJava(MavenPublication) {
+            artifactId = "wisp-loader"
             // add all the jars that should be included when publishing to maven
             from components.java
 //            artifact(fatJar)
@@ -86,12 +86,12 @@ publishing {
     }
 
     repositories {
-        maven {
-            url ENV.MAVEN_URL
-            credentials {
-                username ENV.MAVEN_USER
-                password ENV.MAVEN_PASSWORD
-            }
-        }
+//        maven {
+//            url ENV.MAVEN_URL
+//            credentials {
+//                username ENV.MAVEN_USER
+//                password ENV.MAVEN_PASSWORD
+//            }
+//        }
     }
 }
