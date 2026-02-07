@@ -1,6 +1,5 @@
 plugins {
     id 'net.fabricmc.fabric-loom' version '1.14-SNAPSHOT'
-    id 'maven-publish'
 }
 
 group = "me.alphamode.wisp.minecraft"
@@ -30,25 +29,4 @@ test {
 
 java {
     withSourcesJar()
-}
-
-def ENV = System.getenv()
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            // add all the jars that should be included when publishing to maven
-            from components.java
-        }
-    }
-
-    repositories {
-        maven {
-            url ENV.MAVEN_URL
-            credentials {
-                username ENV.MAVEN_USER
-                password ENV.MAVEN_PASSWORD
-            }
-        }
-    }
 }

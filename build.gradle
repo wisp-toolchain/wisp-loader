@@ -7,7 +7,7 @@ plugins {
 
 
 group = 'me.alphamode.wisp'
-version = '0.1.17'
+version = '1.0.0-ALPHA'
 
 base {
     archivesName = project.name
